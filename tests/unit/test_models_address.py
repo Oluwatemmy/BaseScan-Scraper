@@ -1,5 +1,11 @@
 # tests/unit/test_models_address.py
-from basescan_scraper.models.address import AddressProfile, Transaction
+from basescan_scraper.models.address import (
+    AddressProfile,
+    InternalTransaction,
+    NftTransfer,
+    TokenTransfer,
+    Transaction,
+)
 from basescan_scraper.models.common import Amount
 
 
@@ -26,3 +32,26 @@ def test_address_profile_minimal():
     )
     assert p.address.startswith("0x")
     assert p.token_holdings_count == 201
+
+
+def test_token_transfer_amount_is_string():
+    t = TokenTransfer(hash="0x" + "a" * 64, block=1, from_address="0x" + "1" * 40,
+                      to_address="0x" + "2" * 40, amount="382,277",
+                      token_name="Eos", token_symbol="Eos", token_address="0x" + "3" * 40)
+    assert t.amount == "382,277"
+    assert t.token_symbol == "Eos"
+
+
+def test_nft_transfer_has_type_and_quantity():
+    n = NftTransfer(hash="0x" + "a" * 64, block=1, from_address="0x" + "1" * 40,
+                    to_address="0x" + "2" * 40, token_type="ERC-1155",
+                    token_id="6277", token_address="0x" + "3" * 40,
+                    collection_name="SuperPositions", quantity="14526371714", method="Exec Transaction")
+    assert n.token_type == "ERC-1155"
+    assert n.quantity == "14526371714"
+
+
+def test_internal_transaction_shape():
+    i = InternalTransaction(parent_hash="0x" + "a" * 64, block=1, from_address="0x" + "1" * 40,
+                            to_address="0x" + "2" * 40, value=Amount.from_wei("730000000000", symbol="ETH"))
+    assert i.parent_hash.startswith("0x")

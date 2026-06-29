@@ -31,3 +31,8 @@ class Fetcher(Protocol):
         raw user input here.
         """
         ...
+
+    async def post_json(self, path: str, body: dict) -> str:
+        """POST `body` as JSON and return the response text. Same retry/timeout/
+        size-cap semantics as `get`. `path` is caller-validated."""
+        ...

@@ -33,6 +33,18 @@ def test_parse_profile_raises_on_missing_balance():
         parse_address_profile("<html><body>nothing</body></html>", address=ADDR)
 
 
+def test_parse_profile_detects_contract():
+    html = (FIXTURE.parent / "address_usdc_contract.html").read_text(encoding="utf-8")
+    p = parse_address_profile(html, address="0x833589fcd6edb6e08f4c7c32d4f71b54bda02913")
+    assert p.is_contract is True
+
+
+def test_parse_profile_eoa_is_not_contract():
+    html = FIXTURE.read_text(encoding="utf-8")  # address_donate.html (EOA)
+    p = parse_address_profile(html, address=ADDR)
+    assert p.is_contract is False
+
+
 def test_parse_transactions_first_row_enriched():
     html = FIXTURE.read_text(encoding="utf-8")
     txs = parse_transactions(html)
@@ -83,3 +95,21 @@ def test_parse_transactions_ens_named_counterparty_row():
     assert row.from_address == "0x1046394abffeec81be8c48136745a4a46917ccbc"  # oxmax.base.eth
     assert row.to_address == "0x71c7656ec7ab88b098defb751b7401b5f6d8976f"   # donate
     assert row.direction == "in"
+
+
+def test_parse_transactions_on_txs_page_full_precision():
+    html = (FIXTURE.parent / "txs_donate_p1.html").read_text(encoding="utf-8")
+    txs = parse_transactions(html)
+    assert len(txs) == 50  # /txs default page size
+    first = txs[0]
+    assert first.hash == "0xb239798ab298435ae661f8693bdc9ba52c7f04bae796d7d99f1cb7d976e2140d"
+    assert first.block == 47819759
+    assert first.from_address == "0x3ae6963e43f804e455b123c2015cfc88fdfe02b5"
+    assert first.to_address == "0x71c7656ec7ab88b098defb751b7401b5f6d8976f"
+    assert first.direction == "in"
+    assert first.method == "Transfer"
+    assert first.timestamp == "2026-06-25T23:07:45Z"
+    # /txs shows fuller precision than the /address page
+    assert first.value.decimal == "0.011209138199984"
+    assert first.value.wei == "11209138199984000"
+    assert first.txn_fee is not None and first.txn_fee.decimal == "0.00000014"

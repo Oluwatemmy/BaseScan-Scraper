@@ -87,3 +87,26 @@ async def test_oversize_response_rejected():
     with pytest.raises(ResponseTooLarge):
         await f.get("/x")
     await f.aclose()
+
+
+@respx.mock
+async def test_post_json_returns_text():
+    route = respx.post(f"{BASE}/x.aspx/Get").mock(
+        return_value=httpx.Response(200, json={"d": {"ok": 1}}))
+    f = HttpFetcher(_settings())
+    body = await f.post_json("/x.aspx/Get", {"a": 1})
+    assert '"ok"' in body
+    sent = route.calls.last.request
+    assert sent.headers["content-type"].startswith("application/json")
+    assert sent.headers["x-requested-with"] == "XMLHttpRequest"
+    await f.aclose()
+
+
+@respx.mock
+async def test_post_json_5xx_retries_then_raises():
+    route = respx.post(f"{BASE}/x").mock(return_value=httpx.Response(503))
+    f = HttpFetcher(_settings())
+    with pytest.raises(UpstreamUnavailable):
+        await f.post_json("/x", {})
+    assert route.call_count == 3
+    await f.aclose()

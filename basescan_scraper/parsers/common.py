@@ -16,6 +16,17 @@ def clean_text(text: str | None) -> str:
 
 
 _NUM_RE = re.compile(r"[-+]?[\d,]*\.?\d+")
+_DATETIME_RE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2}):(\d{2})$")
+
+
+def to_iso_utc(text: str | None) -> str | None:
+    """Convert 'YYYY-MM-DD H:MM:SS' (1- or 2-digit hour) to 'YYYY-MM-DDTHH:MM:SSZ'.
+    Returns None if the text is empty or not a datetime."""
+    m = _DATETIME_RE.match(clean_text(text))
+    if not m:
+        return None
+    y, mo, d, h, mi, s = m.groups()
+    return f"{y}-{mo}-{d}T{int(h):02d}:{mi}:{s}Z"
 
 
 def parse_wei_from_eth_text(text: str, decimals: int = 18) -> str:

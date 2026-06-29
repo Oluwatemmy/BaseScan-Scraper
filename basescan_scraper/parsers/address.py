@@ -3,12 +3,18 @@ import re
 
 from selectolax.parser import HTMLParser
 
-from basescan_scraper.models.address import AddressProfile, Transaction
+from basescan_scraper.models.address import (
+    AddressProfile,
+    InternalTransaction,
+    TokenTransfer,
+    Transaction,
+)
 from basescan_scraper.models.common import Amount
 from basescan_scraper.parsers.common import (
     ParseError,
     clean_text,
     parse_wei_from_eth_text,
+    to_iso_utc,
 )
 
 _HOLDINGS_RE = re.compile(r"\(>?(\d[\d,]*)\s+Tokens\)")
@@ -19,7 +25,10 @@ _FUNDED_BY_RE = re.compile(
     r"Funded By.*?/address/(0x[0-9a-fA-F]{40})", re.DOTALL
 )
 _USD_RE = re.compile(r"\$([\d,]+(?:\.\d+)?)")
-_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$")
+_TOKEN_HREF_RE = re.compile(r"/token/(0x[0-9a-fA-F]{40})")
+# Token cell text is "ERC-20: Name (SYM)" for most tokens, but well-known tokens
+# (e.g. USDC) render as just "Name (SYM)" with no "ERC-20:" prefix — so it's optional.
+_TOKEN_NAMESYM_RE = re.compile(r"(?:ERC-\d+:\s*)?(.+)\s*\(([^)]+)\)\s*$")
 
 
 def _find_label_value(tree: HTMLParser, label: str) -> str | None:
@@ -67,6 +76,8 @@ def parse_address_profile(html: str, address: str) -> AddressProfile:
     if funded_m:
         funded_by = funded_m.group(1).lower()
 
+    is_contract = tree.css_first("#ContentPlaceHolder1_li_contracts") is not None
+
     return AddressProfile(
         address=address.lower(),
         eth_balance=eth_balance,
@@ -74,23 +85,34 @@ def parse_address_profile(html: str, address: str) -> AddressProfile:
         token_holdings_count=holdings_count,
         token_holdings_value_usd=holdings_value_usd,
         funded_by=funded_by,
+        is_contract=is_contract,
     )
 
 
 def _transactions_table(tree: HTMLParser):
+    """Prefer the #transactions container (the /address page); otherwise the first
+    table that contains a /tx/ link (the dedicated /txs list page)."""
     container = tree.css_first("#transactions")
-    if container is None:
-        return None
-    return container.css_first("table")
+    if container is not None:
+        table = container.css_first("table")
+        if table is not None:
+            return table
+    for table in tree.css("table"):
+        if table.css_first("a[href^='/tx/']") is not None:
+            return table
+    return None
 
 
 def _row_addresses(tr) -> list[str]:
     """Collect the row's From/To addresses in document order. A party appears
     either as a `data-highlight-target` attribute (nametagged cells like
-    "BaseScan: Donate") OR as an `/address/0x...` href (ENS/domain-named cells
-    like "oxmax.base.eth", which carry no data-highlight-target). We read both
-    so an ENS-named counterparty is never dropped. Lowercased, validated,
-    order-preserving dedup; first = from, second = to."""
+    "BaseScan: Donate" on the /address page), as an `/address/0x...` href
+    (ENS/domain-named cells like "oxmax.base.eth", which carry no
+    data-highlight-target), or — on the dedicated /txs list page — only as the
+    `data-clipboard-text` of a copy button (a nametagged To cell there has
+    neither a highlight target nor an /address/ href). We read all three so a
+    counterparty is never dropped. Lowercased, validated, order-preserving
+    dedup; first = from, second = to."""
     ordered: list[str] = []
 
     def _add(val: str | None) -> None:
@@ -102,7 +124,8 @@ def _row_addresses(tr) -> list[str]:
 
     # Walk ALL descendants in document order (a comma selector groups matches by
     # selector, not document order, which would swap From/To). For each node take
-    # its data-highlight-target, else an /address/ href.
+    # its data-highlight-target, else an /address/ href, else a copy button's
+    # data-clipboard-text (the only address carrier for a nametagged /txs To cell).
     for n in tr.css("*"):
         dht = n.attributes.get("data-highlight-target")
         if dht:
@@ -112,6 +135,8 @@ def _row_addresses(tr) -> list[str]:
         m = re.search(r"/address/(0x[0-9a-fA-F]{40})", href)
         if m:
             _add(m.group(1))
+            continue
+        _add(n.attributes.get("data-clipboard-text"))
     return ordered
 
 
@@ -137,14 +162,11 @@ def _row_method(tr) -> str | None:
 
 
 def _row_timestamp(tr) -> str | None:
-    """Convert the hidden showDate cell ('YYYY-MM-DD HH:MM:SS') to ISO 8601 UTC."""
+    """ISO 8601 UTC from the hidden showDate cell ('YYYY-MM-DD H:MM:SS')."""
     cell = tr.css_first("td.showDate")
     if cell is None:
         return None
-    text = clean_text(cell.text(deep=True))
-    if not _DATE_RE.match(text):
-        return None
-    return text.replace(" ", "T") + "Z"
+    return to_iso_utc(clean_text(cell.text(deep=True)))
 
 
 def _row_txn_fee(tr) -> Amount | None:
@@ -157,6 +179,37 @@ def _row_txn_fee(tr) -> Amount | None:
         return Amount.from_wei(parse_wei_from_eth_text(text), symbol="ETH")
     except ValueError:
         return None
+
+
+def parse_internal_transactions(html: str) -> list[InternalTransaction]:
+    tree = HTMLParser(html)
+    table = None
+    for t in tree.css("table"):
+        if t.css_first("a[href^='/tx/']") is not None:
+            table = t
+            break
+    if table is None:
+        return []
+    rows: list[InternalTransaction] = []
+    for tr in table.css("tbody tr"):
+        row_html = tr.html or ""
+        hash_m = _HASH_RE.search(row_html)
+        if not hash_m:
+            continue
+        addrs = _row_addresses(tr)
+        block_m = re.search(r"/block/(\d+)", row_html)
+        value_wei = _row_value_wei(tr)
+        rows.append(
+            InternalTransaction(
+                parent_hash=hash_m.group(1),
+                block=int(block_m.group(1)) if block_m else 0,
+                timestamp=_row_timestamp(tr),
+                from_address=addrs[0] if addrs else "",
+                to_address=addrs[1] if len(addrs) > 1 else None,
+                value=Amount.from_wei(value_wei, symbol="ETH"),
+            )
+        )
+    return rows
 
 
 def parse_transactions(html: str) -> list[Transaction]:
@@ -198,6 +251,68 @@ def parse_transactions(html: str) -> list[Transaction]:
                 method=_row_method(tr),
                 direction=direction,
                 txn_fee=_row_txn_fee(tr),
+            )
+        )
+    return rows
+
+
+def _token_cell(tr):
+    """The Token column: the <td> containing a /token/ contract link. Keying off the
+    link (not 'ERC-' text) means well-known tokens like USDC — which render as
+    "USDC (USDC)" without the "ERC-20:" prefix — are still found."""
+    for td in tr.css("td"):
+        if _TOKEN_HREF_RE.search(td.html or ""):
+            return td
+    return None
+
+
+def parse_token_transfers(html: str) -> list[TokenTransfer]:
+    tree = HTMLParser(html)
+    table = None
+    for t in tree.css("table"):
+        if t.css_first("a[href^='/tx/']") is not None:
+            table = t
+            break
+    if table is None:
+        return []
+    rows: list[TokenTransfer] = []
+    for tr in table.css("tbody tr"):
+        row_html = tr.html or ""
+        hash_m = _HASH_RE.search(row_html)
+        if not hash_m:
+            continue
+        block_m = re.search(r"/block/(\d+)", row_html)
+        amount_node = tr.css_first("span.td_showAmount")
+        amount = clean_text(amount_node.text(deep=True)) if amount_node is not None else ""
+
+        token_name = token_symbol = token_address = None
+        tcell = _token_cell(tr)
+        if tcell is not None:
+            href_m = _TOKEN_HREF_RE.search(tcell.html or "")
+            if href_m:
+                token_address = href_m.group(1).lower()
+            ns_m = _TOKEN_NAMESYM_RE.search(clean_text(tcell.text(deep=True)))
+            if ns_m:
+                # Greedy name group can absorb the space before '(', so strip it.
+                token_name, token_symbol = ns_m.group(1).strip(), ns_m.group(2).strip()
+
+        # Exclude the token CONTRACT address (from the Token cell) so it can never be
+        # mistaken for from/to, regardless of column order.
+        addrs = [a for a in _row_addresses(tr) if a != token_address]
+        from_addr = addrs[0] if addrs else ""
+        to_addr = addrs[1] if len(addrs) > 1 else (addrs[0] if addrs else "")
+
+        rows.append(
+            TokenTransfer(
+                hash=hash_m.group(1),
+                block=int(block_m.group(1)) if block_m else 0,
+                timestamp=_row_timestamp(tr),
+                from_address=from_addr,
+                to_address=to_addr,
+                amount=amount,
+                token_name=token_name,
+                token_symbol=token_symbol,
+                token_address=token_address,
             )
         )
     return rows

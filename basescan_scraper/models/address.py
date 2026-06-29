@@ -35,7 +35,7 @@ class TokenTransfer(BaseModel):
     timestamp: Optional[str] = None
     from_address: str
     to_address: str
-    value: Amount
+    amount: str = Field(examples=["382,277"], description="Display amount as shown by BaseScan")
     token_name: Optional[str] = None
     token_symbol: Optional[str] = None
     token_address: Optional[str] = None
@@ -47,9 +47,12 @@ class NftTransfer(BaseModel):
     timestamp: Optional[str] = None
     from_address: str
     to_address: str
+    token_type: str = Field(examples=["ERC-721", "ERC-1155"])
     token_id: Optional[str] = None
-    collection_name: Optional[str] = None
     token_address: Optional[str] = None
+    collection_name: Optional[str] = None
+    quantity: Optional[str] = Field(default=None, description="Token count (ERC-1155)")
+    method: Optional[str] = None
 
 
 class AddressProfile(BaseModel):
