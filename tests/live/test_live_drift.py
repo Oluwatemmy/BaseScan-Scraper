@@ -23,3 +23,31 @@ async def test_live_address_still_parses():
     assert txs[0].hash.startswith("0x") and len(txs[0].hash) == 66
     assert txs[0].from_address.startswith("0x")
     assert int(txs[0].value.wei) >= 0
+
+
+@pytest.mark.live
+async def test_live_lists_parse_against_real_basescan():
+    from basescan_scraper.services.address_service import AddressService
+    from basescan_scraper.cache.memory import MemoryCache
+    from basescan_scraper.fetchers.http_fetcher import HttpFetcher
+    busy = "0x7a63e8fc1d0a5e9be52f05817e8c49d9e2d6efae"
+    fetcher = HttpFetcher(get_settings())
+    svc = AddressService(fetcher, MemoryCache(maxsize=10, ttl=0))
+    try:
+        txs = await svc.get_transactions(busy, page=1, page_size=50)
+        internal = await svc.get_internal_transactions(busy, page=1, page_size=50)
+        tokens = await svc.get_token_transfers(busy, page=1, page_size=50)
+        nft = await svc.get_nft_transfers(busy, page=1, page_size=25)
+    finally:
+        await fetcher.aclose()
+    # transactions: real total + rows
+    assert txs.pagination.total and txs.pagination.total > 0
+    assert all(t.hash.startswith("0x") and len(t.hash) == 66 for t in txs.data)
+    # internal: list parses (may be empty for some addresses, but this one has txns)
+    assert all(i.parent_hash.startswith("0x") for i in internal.data)
+    # tokens: amount + symbol present
+    assert all(isinstance(t.amount, str) for t in tokens.data)
+    # nft: JSON endpoint + ERC type
+    assert nft.pagination.total and nft.pagination.total > 0
+    assert all(n.token_type.startswith("ERC-") for n in nft.data)
+    assert all(n.hash.startswith("0x") and len(n.hash) == 66 for n in nft.data)

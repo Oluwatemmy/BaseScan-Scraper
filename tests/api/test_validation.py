@@ -1,7 +1,12 @@
 # tests/api/test_validation.py
 import pytest
 
-from basescan_scraper.api.validators import normalize_address, ValidationError
+from basescan_scraper.api.validators import (
+    normalize_address,
+    validate_page,
+    validate_page_size,
+    ValidationError,
+)
 
 
 def test_valid_address_normalized_lowercase():
@@ -26,3 +31,25 @@ def test_invalid_address_rejected(bad):
 def test_address_rejects_adversarial(bad):
     with pytest.raises(ValidationError):
         normalize_address(bad)
+
+
+def test_validate_page_defaults_and_lower_bound():
+    assert validate_page(None) == 1
+    assert validate_page(3) == 3
+    with pytest.raises(ValidationError):
+        validate_page(0)
+
+
+def test_validate_page_upper_bound():
+    assert validate_page(100_000) == 100_000
+    with pytest.raises(ValidationError):
+        validate_page(100_001)
+
+
+def test_validate_page_size_cap():
+    assert validate_page_size(None) == 50
+    assert validate_page_size(100) == 100
+    with pytest.raises(ValidationError):
+        validate_page_size(101)
+    with pytest.raises(ValidationError):
+        validate_page_size(0)
