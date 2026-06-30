@@ -4,12 +4,14 @@ from fastapi.responses import JSONResponse
 
 from basescan_scraper.api.validators import ValidationError
 from basescan_scraper.fetchers.base import (
+    ResponseTooLarge,
     UpstreamRateLimited,
     UpstreamTimeout,
     UpstreamUnavailable,
 )
 from basescan_scraper.models.common import ProblemDetail
 from basescan_scraper.parsers.common import ParseError
+from basescan_scraper.services.transaction_service import NotFound
 
 _CT = "application/problem+json"
 
@@ -45,3 +47,13 @@ def register_error_handlers(app) -> None:
     async def _on_parse_error(_: Request, exc: ParseError):
         return _problem(502, "/errors/parse-error", "Upstream parse error",
                         "Could not parse the BaseScan response.")
+
+    @app.exception_handler(ResponseTooLarge)
+    async def _on_too_large(_: Request, exc: ResponseTooLarge):
+        return _problem(502, "/errors/upstream-too-large", "Upstream response too large",
+                        "The BaseScan page exceeded the size limit and could not be processed.")
+
+    @app.exception_handler(NotFound)
+    async def _on_not_found(_: Request, exc: NotFound):
+        return _problem(404, "/errors/not-found", "Not found",
+                        "No transaction found for that hash on Base.")
