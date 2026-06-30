@@ -90,6 +90,35 @@ async def test_oversize_response_rejected():
 
 
 @respx.mock
+async def test_redirect_not_followed():
+    # A 3xx must NOT be chased — SSRF-via-redirect guard. The target is never hit.
+    target = respx.get(f"{BASE}/internal").mock(
+        return_value=httpx.Response(200, html="secret"))
+    respx.get(f"{BASE}/x").mock(
+        return_value=httpx.Response(302, headers={"Location": f"{BASE}/internal"}))
+    f = HttpFetcher(_settings())
+    with pytest.raises(UpstreamUnavailable):
+        await f.get("/x")
+    assert target.call_count == 0  # redirect target never requested
+    await f.aclose()
+
+
+@respx.mock
+async def test_oversize_streamed_without_content_length_aborts():
+    # No Content-Length (chunked) body over the cap must still be rejected via
+    # the streaming early-abort, not buffered whole.
+    async def gen():
+        for _ in range(50):
+            yield b"a" * 50  # 2500 bytes total, streamed, no Content-Length
+
+    respx.get(f"{BASE}/x").mock(return_value=httpx.Response(200, content=gen()))
+    f = HttpFetcher(_settings(MAX_RESPONSE_BYTES=100))
+    with pytest.raises(ResponseTooLarge):
+        await f.get("/x")
+    await f.aclose()
+
+
+@respx.mock
 async def test_post_json_returns_text():
     route = respx.post(f"{BASE}/x.aspx/Get").mock(
         return_value=httpx.Response(200, json={"d": {"ok": 1}}))

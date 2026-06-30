@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from basescan_scraper.api import deps
 from basescan_scraper.api.errors import register_error_handlers
-from basescan_scraper.api.routers import addresses, health, transactions
+from basescan_scraper.api.routers import addresses, health, tokens, transactions
 from basescan_scraper.config import get_settings
 
 
@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
             {"name": "Health", "description": "Service liveness."},
             {"name": "Addresses", "description": "Wallet/address data."},
             {"name": "Transactions", "description": "Transaction details and logs."},
+            {"name": "Tokens", "description": "Token info and holders."},
         ],
     )
 
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(addresses.router)
     app.include_router(transactions.router)
+    app.include_router(tokens.router)
     return app
 
 

@@ -71,3 +71,34 @@ async def test_live_transaction_detail_and_logs():
     assert tx.status == "success"
     assert tx.value.decimal == "0.011209138199984949"
     assert isinstance(logs, list)
+
+
+@pytest.mark.live
+async def test_live_token_info_and_holders():
+    from basescan_scraper.cache.memory import MemoryCache
+    from basescan_scraper.fetchers.http_fetcher import HttpFetcher
+    from basescan_scraper.services.token_service import TokenService
+
+    usdc = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+    fetcher = HttpFetcher(get_settings())
+    svc = TokenService(fetcher, MemoryCache(maxsize=10, ttl=0))
+    try:
+        info = await svc.get_info(usdc)
+        holders = await svc.get_holders(usdc, page=1, page_size=50)
+    finally:
+        await fetcher.aclose()
+    # info: stable identity fields (price/supply drift, so don't assert exact)
+    assert info.symbol == "USDC"
+    assert info.decimals == 6
+    assert info.holders_count and info.holders_count > 0
+    assert info.price_usd is not None
+    # holders: real rows, valid addresses, top-1,000 cap total
+    assert len(holders.data) > 0
+    assert all(h.address.startswith("0x") and len(h.address) == 42 for h in holders.data)
+    assert all(h.rank > 0 for h in holders.data)
+    assert holders.pagination.total == 1000
+    # percentage is computed from supply (not the server "0.0000%" placeholder);
+    # USDC's top holder holds several percent, so it must be a real non-zero %.
+    top = holders.data[0]
+    assert top.percentage and top.percentage.endswith("%")
+    assert top.percentage != "0.0000%"
