@@ -5,6 +5,7 @@ from basescan_scraper.cache.memory import MemoryCache
 from basescan_scraper.config import get_settings
 from basescan_scraper.fetchers.http_fetcher import HttpFetcher
 from basescan_scraper.services.address_service import AddressService
+from basescan_scraper.services.transaction_service import TransactionService
 
 
 @lru_cache
@@ -20,3 +21,7 @@ def _cache() -> MemoryCache:
 
 def get_address_service() -> AddressService:
     return AddressService(_fetcher(), _cache())
+
+
+def get_transaction_service() -> TransactionService:
+    return TransactionService(_fetcher(), _cache())

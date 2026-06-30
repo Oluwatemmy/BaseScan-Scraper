@@ -51,3 +51,23 @@ async def test_live_lists_parse_against_real_basescan():
     assert nft.pagination.total and nft.pagination.total > 0
     assert all(n.token_type.startswith("ERC-") for n in nft.data)
     assert all(n.hash.startswith("0x") and len(n.hash) == 66 for n in nft.data)
+
+
+@pytest.mark.live
+async def test_live_transaction_detail_and_logs():
+    from basescan_scraper.services.transaction_service import TransactionService
+    from basescan_scraper.cache.memory import MemoryCache
+    from basescan_scraper.fetchers.http_fetcher import HttpFetcher
+    h = "0xb239798ab298435ae661f8693bdc9ba52c7f04bae796d7d99f1cb7d976e2140d"
+    fetcher = HttpFetcher(get_settings())
+    svc = TransactionService(fetcher, MemoryCache(maxsize=10, ttl=0))
+    try:
+        tx = await svc.get_transaction(h)
+        logs = await svc.get_logs(h)
+    finally:
+        await fetcher.aclose()
+    assert tx.hash == h
+    assert tx.block == 47819759
+    assert tx.status == "success"
+    assert tx.value.decimal == "0.011209138199984949"
+    assert isinstance(logs, list)

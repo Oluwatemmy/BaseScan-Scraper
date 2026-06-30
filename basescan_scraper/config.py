@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     base_url: str = Field(default="https://basescan.org", alias="BASESCAN_BASE_URL")
     request_timeout_seconds: float = Field(default=15.0, alias="REQUEST_TIMEOUT_SECONDS")
-    max_response_bytes: int = Field(default=5_242_880, alias="MAX_RESPONSE_BYTES")
+    max_response_bytes: int = Field(default=20_971_520, alias="MAX_RESPONSE_BYTES")
     fetch_max_retries: int = Field(default=3, alias="FETCH_MAX_RETRIES")
     outbound_min_interval_seconds: float = Field(
         default=0.25, alias="OUTBOUND_MIN_INTERVAL_SECONDS"
