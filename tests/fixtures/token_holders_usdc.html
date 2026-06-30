@@ -1,0 +1,1433 @@
+
+
+<!doctype html>
+<html id="html" lang="en" data-bs-theme="light">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="Description" content="Base allows you to explore and search the Base Network for transactions, addresses, tokens, prices and other activities taking place on the Base Network">
+    <meta name="author" content="basescan.org">
+    <meta name="keywords" content="Base, explorer, search, blockchain, crypto, currency, api endpoints, api pro service, eth api provider, base api, base block explorer, base blockchain explorer">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="shortcut icon" href='/assets/base/images/favicon.ico'>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/assets/vendor/font-awesome/css/all.min.css?v=26.6.4.0">
+    <link rel="stylesheet" href="/assets/css/theme.min.css?v=">
+    <link rel="stylesheet" href="/assets/base/css/base.min.css?v=">
+
+    <style type="text/css">
+        #overlay {
+            color: #666666;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            z-index: 5000;
+            top: 0;
+            left: 0;
+            float: left;
+            text-align: center;
+        }
+
+        [data-bs-theme=light] .nav-pills-alt .nav-link {
+            --bs-nav-pills-link-active-bg: var(--bs-gray-200);
+            --bs-nav-pills-link-active-color: var(--bs-body-color);
+        }
+
+        [data-bs-theme=dim] .nav-pills-alt .nav-link,
+        [data-bs-theme=dark] .nav-pills-alt .nav-link {
+            --bs-nav-pills-link-active-bg: var(--bs-gray-700);
+            --bs-nav-pills-link-active-color: var(--bs-body-color);
+        }
+
+        svg .highcharts-label.highcharts-tooltip {
+            display: none;
+        }
+
+        .highcharts-series.highcharts-bar-series.highcharts-tracker path,
+        .highcharts-series.highcharts-pie-series.highcharts-tracker path,
+        .highcharts-label.highcharts-data-label text tspan {
+            stroke: var(--bs-border-color);
+        }
+
+        .highcharts-grid.highcharts-xaxis-grid .highcharts-grid-line,
+        .highcharts-grid.highcharts-yaxis-grid .highcharts-grid-line {
+            stroke: var(--bs-border-color) !important;
+        }
+
+        #holdersTierDistributionChart .highcharts-series.highcharts-bar-series.highcharts-tracker path,
+        #holdersThresholdDepthChart .highcharts-series.highcharts-bar-series.highcharts-tracker path,
+        #holdersTierDistributionChart .highcharts-axis-line,
+        #holdersThresholdDepthChart .highcharts-axis-line {
+            stroke: transparent;
+        }
+
+        #holdersTierDistributionChart .highcharts-axis-labels.highcharts-xaxis-labels text,
+        #holdersTierDistributionChart .highcharts-axis-labels.highcharts-yaxis-labels text,
+        #holdersThresholdDepthChart .highcharts-axis-labels.highcharts-xaxis-labels text,
+        #holdersThresholdDepthChart .highcharts-axis-labels.highcharts-yaxis-labels text {
+            fill: var(--bs-secondary-color) !important;
+        }
+
+        #holdersTierDistributionChart .highcharts-grid.highcharts-yaxis-grid .highcharts-grid-line,
+        #holdersThresholdDepthChart .highcharts-grid.highcharts-yaxis-grid .highcharts-grid-line {
+            stroke: var(--bs-border-color) !important;
+        }
+
+        #holdersTierDistributionChart .highcharts-grid.highcharts-xaxis-grid .highcharts-grid-line,
+        #holdersThresholdDepthChart .highcharts-grid.highcharts-xaxis-grid .highcharts-grid-line {
+            stroke: transparent !important;
+        }
+
+        #holdersTierDistributionChart .highcharts-point,
+        #holdersThresholdDepthChart .highcharts-point {
+            stroke: var(--bs-body-bg);
+        }
+
+        .highcharts-label.highcharts-data-label text {
+            font-weight: normal !important;
+        }
+
+        .highcharts-text-outline {
+            stroke-width: 0;
+            fill: currentColor;
+            stroke: currentColor;
+        }
+
+        .highcharts-label.highcharts-tooltip .fw-medium {
+            font-weight: 500 !important;
+        }
+    </style>
+</head>
+<body id="body">
+    <!-- Holder Stats -->
+    <div id="divHolderStatsOverview" class="card mb-1">
+        <div class="card-body">
+            
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                    <h3 class="h6 mb-0">Holders Overview</h3>
+                    <span class="small text-muted">(Analytics Snapshot taken 4 mins ago)</span>
+                </div>
+
+                <div class="d-flex gap-2 d-none">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-cap">
+                            <i class="far fa-question-circle text-muted me-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover" title="Toggle more stats visibility"></i>More Stats:
+                        </span>
+
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" data-target="more-stats" checked>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+            
+
+            <!-- Overview Stats -->
+            <div class="row g-3">
+                <div class="col-md-6 col-xl-4">
+                    <div class="card shadow-none rounded h-100">
+                        <div class="card-body">
+                            <div class="text-cap mb-1">Top 100 Concentration</div>
+                            <div id="holdersOverviewTopCohortShareValue" class="fs-5 fw-medium mb-1.5">
+                                74.20%
+                            </div>
+                            <hr class="my-3">
+                            <div class="small">
+                                <i class="far fa-sparkles me-1"></i>
+                                Market Cap of Top 5 holders: <strong>16.29%</strong> | Top 10 holders: <strong>25.80%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-4">
+                    <div class="card shadow-none rounded h-100">
+                        <div class="card-body">
+                            <div class="text-cap mb-1">WHALE CONCENTRATION</div>
+                            <div id="holdersOverviewWhaleShareValue" class="fs-5 fw-medium mb-1.5">
+                                87.77%
+                            </div>
+                            <hr class="my-3">
+                            <div class="small">
+                                <i class="far fa-sparkles me-1"></i>
+                                Whales make up <strong>0.02%</strong> of holders
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-4">
+                    <div class="card shadow-none rounded h-100">
+                        <div class="card-body">
+                            <div class="text-cap mb-1">
+                                <span>Gini Distribution Score</span>
+                                <i class="far fa-info-circle text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover" data-bs-title="Measures how evenly tokens are distributed: 0 = perfectly equal, 1 = one holder owns all tokens."></i>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1.5">
+                                <div id="holdersOverviewGiniCoefficientValue" class="fs-5 fw-medium mb-0">
+                                    0.9987
+                                </div>
+                                
+                            </div>
+                            <hr class="my-3">
+                            <div class="small">
+                                <i class="far fa-sparkles me-1"></i>
+                                There are <span class="fw-medium">0</span> holders who own at least 1% of total supply
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Overview Stats -->
+
+            
+            <div class="row g-3 mt-0" data-toggle-section="more-stats">
+                <div class="col-12 col-xl-4">
+                    <div class="card shadow-none rounded h-100" style="min-height: 20rem;">
+                        <div class="card-header py-3 d-flex align-items-center justify-content-between gap-2">
+                            <h6 class="fw-normal mb-0">Holder Concentration</h6>
+
+                            <!-- Tab Navs -->
+                            <ul class="nav nav-pills nav-segment text-nowrap border-2 rounded-1 gap-0.5 p-0.5 my-n1" role="tablist" aria-label="Holder concentration view">
+                                <li class="nav-item snap-align-start">
+                                    <button class="nav-link py-0.5 px-2" style="font-size: 0.67965rem; border-radius: 0.3rem;" id="transfer-total" data-bs-toggle="tab" data-bs-target="#transfer-total-content" type="button" role="tab" aria-controls="transfer-total-content" aria-selected="true">
+                                        <i class="far fa-list"></i>
+                                    </button>
+                                </li>
+
+                                <li class="nav-item snap-align-start">
+                                    <button class="nav-link py-0.5 px-2 active" style="font-size: 0.67965rem; border-radius: 0.3rem;" id="transfer-24h" data-bs-toggle="tab" data-bs-target="#transfer-24h-content" type="button" role="tab" aria-controls="transfer-24h-content" aria-selected="false">
+                                        <i class="far fa-chart-pie"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                            <!-- End Tab Navs -->
+                        </div>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade" id="transfer-total-content" role="tabpanel" aria-labelledby="transfer-total" tabindex="0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm small table-hover table-align-middle mb-0">
+                                        <thead class="text-nowrap">
+                                            <tr>
+                                                <th scope="col">Cohort</th>
+                                                <th scope="col" class="text-end">Holding Amount</th>
+                                                <th id="thUsdValueColumn" scope="col" class="text-end">Value</th>
+
+                                                <th scope="col" class="text-end">
+                                                    % Market Cap</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="holdersOverviewConcentrationRows" class="text-nowrap">
+                                            <tr data-holders-concentration-row>
+                            <td data-holders-concentration-label>Top 1-5</td>
+                            <td data-holders-concentration-value-usd class="text-end">685.06 M USDC</td><td data-holders-concentration-value-usd class="text-end">$684.79 M</td>
+                            <td data-holders-concentration-value class="text-end">16.29%</td>
+                        </tr><tr data-holders-concentration-row>
+                            <td data-holders-concentration-label>Top 6-10</td>
+                            <td data-holders-concentration-value-usd class="text-end">400.02 M USDC</td><td data-holders-concentration-value-usd class="text-end">$399.86 M</td>
+                            <td data-holders-concentration-value class="text-end">9.51%</td>
+                        </tr><tr data-holders-concentration-row>
+                            <td data-holders-concentration-label>Top 11-25</td>
+                            <td data-holders-concentration-value-usd class="text-end">1.20 B USDC</td><td data-holders-concentration-value-usd class="text-end">$1.20 B</td>
+                            <td data-holders-concentration-value class="text-end">28.54%</td>
+                        </tr><tr data-holders-concentration-row>
+                            <td data-holders-concentration-label>Top 26-50</td>
+                            <td data-holders-concentration-value-usd class="text-end">595.64 M USDC</td><td data-holders-concentration-value-usd class="text-end">$595.41 M</td>
+                            <td data-holders-concentration-value class="text-end">14.16%</td>
+                        </tr><tr data-holders-concentration-row>
+                            <td data-holders-concentration-label>Top 51-100</td>
+                            <td data-holders-concentration-value-usd class="text-end">239.78 M USDC</td><td data-holders-concentration-value-usd class="text-end">$239.69 M</td>
+                            <td data-holders-concentration-value class="text-end">5.70%</td>
+                        </tr><tr data-holders-concentration-row>
+                            <td data-holders-concentration-label>Outside 100</td>
+                            <td data-holders-concentration-value-usd class="text-end">1.08 B USDC</td><td data-holders-concentration-value-usd class="text-end">$1.08 B</td>
+                            <td data-holders-concentration-value class="text-end">25.80%</td>
+                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade show active" id="transfer-24h-content" role="tabpanel" aria-labelledby="transfer-24h" tabindex="0">
+                                <div class="pt-0 px-3 pb-2">
+                                    <div id="holdersConcentrationDonut" style="height: 13rem;"></div>
+                                    <div id="holdersConcentrationDonutFallback" class="d-none content-center flex-column small text-muted gap-2 py-6">
+                                        <i class="far fa-chart-pie fs-4"></i>
+                                        <span>Chart unavailable.</span>
+                                    </div>
+                                    <div id="holdersConcentrationLegend" class="d-flex flex-wrap align-items-center justify-content-center fs-80x mt-1 gap-2" style="column-gap: .75rem; row-gap: .15rem; line-height: 1.15;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-4">
+                    <div class="card shadow-none rounded h-100" style="min-height: 20rem;">
+                        <div class="card-header py-3 d-flex align-items-center justify-content-between gap-2">
+                            <h6 class="fw-normal mb-0">Tier Distribution</h6>
+
+                            <!-- Tab Navs -->
+                            <ul class="nav nav-pills nav-segment text-nowrap border-2 rounded-1 gap-0.5 p-0.5 my-n1" role="tablist" aria-label="Tier distribution view">
+                                <li class="nav-item snap-align-start">
+                                    <button class="nav-link py-0.5 px-2 active" style="font-size: 0.67965rem; border-radius: 0.3rem;" id="tier-dist-table-tab" data-bs-toggle="tab" data-bs-target="#tier-dist-table-content" type="button" role="tab" aria-controls="tier-dist-table-content" aria-selected="true">
+                                        <i class="far fa-list"></i>
+                                    </button>
+                                </li>
+
+                                <li class="nav-item snap-align-start">
+                                    <button class="nav-link py-0.5 px-2" style="font-size: 0.67965rem; border-radius: 0.3rem;" id="tier-dist-chart-tab" data-bs-toggle="tab" data-bs-target="#tier-dist-chart-content" type="button" role="tab" aria-controls="tier-dist-chart-content" aria-selected="false">
+                                        <i class="far fa-chart-bar"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                            <!-- End Tab Navs -->
+                        </div>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="tier-dist-table-content" role="tabpanel" aria-labelledby="tier-dist-table-tab" tabindex="0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm small table-hover table-align-middle mb-0">
+                                        <thead class="text-nowrap">
+                                            <tr>
+                                                <th scope="col">Tier</th>
+                                                <th scope="col" class="text-end">Holder Count</th>
+                                                <th scope="col" class="text-end">% Holders</th>
+                                                <th scope="col" class="text-end">
+                                                    % Market Cap</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="holdersTierBreakdown" class="text-nowrap">
+                                            <tr data-holders-tier-row>
+                            <td data-holders-tier-label data-bs-toggle="tooltip" data-bs-title="Wallets holding more than $100,000">🐋 Whale</td>
+                            <td data-holders-tier-holders class="text-end">1,702</td>
+                            <td data-holders-tier-holders-ratio class="text-end">0.02%</td>
+                            <td data-holders-tier-market-ratio class="text-end">87.77%</td>
+                        </tr><tr data-holders-tier-row>
+                            <td data-holders-tier-label data-bs-toggle="tooltip" data-bs-title="Wallets holding more than $10,000 and up to $100,000">🦈 Shark</td>
+                            <td data-holders-tier-holders class="text-end">10,364</td>
+                            <td data-holders-tier-holders-ratio class="text-end">0.11%</td>
+                            <td data-holders-tier-market-ratio class="text-end">7.09%</td>
+                        </tr><tr data-holders-tier-row>
+                            <td data-holders-tier-label data-bs-toggle="tooltip" data-bs-title="Wallets holding more than $1,000 and up to $10,000">🐬 Dolphin</td>
+                            <td data-holders-tier-holders class="text-end">45,362</td>
+                            <td data-holders-tier-holders-ratio class="text-end">0.46%</td>
+                            <td data-holders-tier-market-ratio class="text-end">3.33%</td>
+                        </tr><tr data-holders-tier-row>
+                            <td data-holders-tier-label data-bs-toggle="tooltip" data-bs-title="Wallets holding more than $100 and up to $1,000">🐟 Fish</td>
+                            <td data-holders-tier-holders class="text-end">165,821</td>
+                            <td data-holders-tier-holders-ratio class="text-end">1.68%</td>
+                            <td data-holders-tier-market-ratio class="text-end">1.24%</td>
+                        </tr><tr data-holders-tier-row>
+                            <td data-holders-tier-label data-bs-toggle="tooltip" data-bs-title="Wallets holding more than $10 and up to $100">🦀 Crab</td>
+                            <td data-holders-tier-holders class="text-end">587,346</td>
+                            <td data-holders-tier-holders-ratio class="text-end">5.96%</td>
+                            <td data-holders-tier-market-ratio class="text-end">0.44%</td>
+                        </tr><tr data-holders-tier-row>
+                            <td data-holders-tier-label data-bs-toggle="tooltip" data-bs-title="Wallets holding up to $10">🦐 Shrimp</td>
+                            <td data-holders-tier-holders class="text-end">9,046,944</td>
+                            <td data-holders-tier-holders-ratio class="text-end">91.78%</td>
+                            <td data-holders-tier-market-ratio class="text-end">0.13%</td>
+                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="tier-dist-chart-content" role="tabpanel" aria-labelledby="tier-dist-chart-tab" tabindex="0">
+                                <div class="pt-0 px-3 pb-3">
+                                    <div id="holdersTierDistributionChart" style="height: 14rem;"></div>
+                                    <div id="holdersTierDistributionChartFallback" class="d-none content-center flex-column small text-muted gap-2 py-6">
+                                        <i class="far fa-chart-bar fs-4"></i>
+                                        <span>Chart unavailable.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-4">
+                    <div class="card shadow-none rounded h-100" style="min-height: 20rem;">
+                        <div class="card-header py-3 d-flex align-items-center justify-content-between gap-2">
+                            <h6 class="fw-normal mb-0">Wallet Depth by Threshold</h6>
+
+                            <!-- Tab Navs -->
+                            <ul class="nav nav-pills nav-segment text-nowrap border-2 rounded-1 gap-0.5 p-0.5 my-n1" role="tablist" aria-label="Wallet depth view">
+                                <li class="nav-item snap-align-start">
+                                    <button class="nav-link py-0.5 px-2" style="font-size: 0.67965rem; border-radius: 0.3rem;" id="wallet-depth-table-tab" data-bs-toggle="tab" data-bs-target="#wallet-depth-table-content" type="button" role="tab" aria-controls="wallet-depth-table-content" aria-selected="true">
+                                        <i class="far fa-list"></i>
+                                    </button>
+                                </li>
+
+                                <li class="nav-item snap-align-start">
+                                    <button class="nav-link py-0.5 px-2 active" style="font-size: 0.67965rem; border-radius: 0.3rem;" id="wallet-depth-chart-tab" data-bs-toggle="tab" data-bs-target="#wallet-depth-chart-content" type="button" role="tab" aria-controls="wallet-depth-chart-content" aria-selected="false">
+                                        <i class="far fa-chart-bar"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                            <!-- End Tab Navs -->
+                        </div>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade" id="wallet-depth-table-content" role="tabpanel" aria-labelledby="wallet-depth-table-tab" tabindex="0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm small table-hover table-align-middle mb-0">
+                                        <thead class="text-nowrap">
+                                            <tr>
+                                                <th scope="col">Threshold</th>
+                                                <th scope="col" class="text-end">Holders</th>
+                                                <th scope="col" class="text-end">% of Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="holdersThresholdRows" class="text-nowrap">
+                                            <tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $10</td>
+                            <td data-holders-threshold-holders class="text-end">810,595</td>
+                            <td data-holders-threshold-ratio class="text-end">8.22%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $50</td>
+                            <td data-holders-threshold-holders class="text-end">329,258</td>
+                            <td data-holders-threshold-ratio class="text-end">3.34%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $100</td>
+                            <td data-holders-threshold-holders class="text-end">223,249</td>
+                            <td data-holders-threshold-ratio class="text-end">2.26%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $250</td>
+                            <td data-holders-threshold-holders class="text-end">131,142</td>
+                            <td data-holders-threshold-ratio class="text-end">1.33%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $500</td>
+                            <td data-holders-threshold-holders class="text-end">87,978</td>
+                            <td data-holders-threshold-ratio class="text-end">0.89%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $1k</td>
+                            <td data-holders-threshold-holders class="text-end">57,428</td>
+                            <td data-holders-threshold-ratio class="text-end">0.58%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $10k</td>
+                            <td data-holders-threshold-holders class="text-end">12,066</td>
+                            <td data-holders-threshold-ratio class="text-end">0.12%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $100k</td>
+                            <td data-holders-threshold-holders class="text-end">1,702</td>
+                            <td data-holders-threshold-ratio class="text-end">0.02%</td>
+                        </tr><tr data-holders-threshold-row>
+                            <td data-holders-threshold-label>> $1M</td>
+                            <td data-holders-threshold-holders class="text-end">212</td>
+                            <td data-holders-threshold-ratio class="text-end">< 0.01%</td>
+                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade show active" id="wallet-depth-chart-content" role="tabpanel" aria-labelledby="wallet-depth-chart-tab" tabindex="0">
+                                <div class="pt-0 px-3 pb-3">
+                                    <div id="holdersThresholdDepthChart" style="height: 14rem;"></div>
+                                    <div id="holdersThresholdDepthChartFallback" class="d-none content-center flex-column small text-muted gap-2 py-6">
+                                        <i class="far fa-chart-bar fs-4"></i>
+                                        <span>Chart unavailable.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <!-- End Holder Stats -->
+
+
+    <div class="card">
+        <script>window.parent.isFrameLoading = true;</script>
+    
+        <!-- Spinner --><div id="overlay" class="text-center py-10 "><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><div class="small text-muted mt-1">Loading</div></div><!-- End Spinner -->
+
+        <span id="lblWarning"></span>
+
+        <div id="maintable">
+            <!-- Data Info -->
+            <div id="divDataInfo" class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <p class="mb-0">
+                        <i id="spinwheel" class="fa fa-spin fa-spinner fa-1x fa-pulse me-1" style="display: none;"></i>
+                        Top 1,000 holders<span class='hidden-xs'> (From a total of 9,858,780 holders)</span>
+                        <br><span Class='text-muted small'>(Holder Snapshot taken 38 mins ago)</span>
+                    </p>
+                    
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <button type='button' class='btn btn-sm btn-white text-nowrap' id='btnExportQuickTokenHolerCSV'>
+	                                                <i class='far fa-download text-muted me-1'></i> Download Page Data
+                                                 </button>
+
+                        <div id="divTokenHoldersChart" class="d-flex align-items-center gap-2">
+                            <button id="btnViewTokenFlowChart" type="button" class="btn btn-sm btn-white text-dark">
+                                <i class="far fa-chart-network text-muted me-1"></i>Token Flow</button>
+
+                            <a id="linkTokenHoldersChart" class="btn btn-sm btn-white text-dark" href="/token/tokenholderchart/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" target="_parent">
+                                <i class="far fa-chart-pie text-muted me-1"></i>Token Holder Chart
+                            </a>
+                        </div>
+
+                        <nav aria-label="page navigation">
+                            <ul class="pagination pagination-sm mb-0"><li class="page-item disabled"><span class="page-link" >First</span></li><li class="page-item disabled"><span class="page-link px-3" ><i class="fa fa-chevron-left small"></i></span><span class="sr-only">Previous</span></li><li class="page-item disabled"><span class="page-link text-nowrap">Page 1 of 20</span></li><li class="page-item" data-bs-toggle='tooltip' title="Go to Next"><a class="page-link px-3" href="javascript:move('generic-tokenholders2?a=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&amp;sid=&amp;m=light&amp;s=0&amp;p=2')" aria-label="Next"><span aria-hidden="True"><i class="fa fa-chevron-right small"></i></span> <span class="sr-only">Next</span></a></li><li class="page-item"><a class="page-link" href="javascript:move('generic-tokenholders2?a=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&amp;sid=&amp;m=light&amp;s=0&amp;p=20')"><span aria-hidden="True">Last</span><span class="sr-only">Last</span></a></li>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <!-- End Data Info -->
+            
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead id="theadHolderTable" class="text-nowrap">
+                        <tr>
+                            <th scope="col" width="1">
+                                Rank
+                            </th>
+                            <th scope="col">
+                                Address
+                            </th>
+                            <th id="labelColumnHeader" scope="col">Label</th>
+
+                            
+                            <th id="col_quantity" scope="col">
+                                Quantity
+                                
+                                
+                            </th>
+
+                            <th scope="col">
+                                Percentage
+                            </th>
+                            <th id="col_value_Title" scope="col">
+                                Value
+                            </th>
+
+                            <th id="col_analytics_Title" class="text-center" scope="col">
+                                Analytics
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody class="align-middle text-nowrap">
+                        <tr><td>1</td><td><div class='d-flex align-items-center gap-1'><span data-bs-toggle='tooltip' title='Public Tag: Morpho: Morpho&#10;(0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb)'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb' target='_parent'>Morpho: Morpho</a></span><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_1", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_1' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='195,270,620.9949'>195,270,620.9949</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$195,195,051.26</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>2</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x8da91a6298ea5d1a8bc985e99798fd0a0f05701a' target='_parent' data-bs-toggle='tooltip' title='0x8da91a6298ea5d1a8bc985e99798fd0a0f05701a'><span data-highlight-target="0x8da91A6298eA5d1A8Bc985e99798fd0A0f05701a">0x8da91A62...A0f05701a</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x8da91A6298eA5d1A8Bc985e99798fd0A0f05701a'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_2", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_2' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='160,000,000.210698'>160,000,000.2107</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$159,938,080.21</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x8da91a6298ea5d1a8bc985e99798fd0a0f05701a#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>3</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xb026ba5501c9fcdb5b4b746c37e349cd61b81b22' target='_parent' data-bs-toggle='tooltip' title='0xb026ba5501c9fcdb5b4b746c37e349cd61b81b22'><span data-highlight-target="0xb026BA5501c9fcDB5b4B746c37e349cd61B81B22">0xb026BA55...d61B81B22</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xb026BA5501c9fcDB5b4B746c37e349cd61B81B22'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_3", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_3' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='158,707,811.660177'>158,707,811.6602</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$158,646,391.74</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xb026ba5501c9fcdb5b4b746c37e349cd61b81b22#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>4</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x0ccc149f4c01a2eada3e9f915ca7628920901623' target='_parent' data-bs-toggle='tooltip' title='0x0ccc149f4c01a2eada3e9f915ca7628920901623'><span data-highlight-target="0x0cCc149f4c01A2eADa3e9f915CA7628920901623">0x0cCc149f...920901623</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x0cCc149f4c01A2eADa3e9f915CA7628920901623'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_4", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_4' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='86,991,146.922079'>86,991,146.9221</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$86,957,481.35</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x0ccc149f4c01a2eada3e9f915ca7628920901623#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>5</td><td><div class='d-flex align-items-center gap-1'><span data-bs-toggle='tooltip' title='Public Tag: Binance: Hot Wallet 34&#10;(0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055)'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055' target='_parent'>Binance: Hot Wallet 34</a></span><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xEe7aE85f2Fe2239E27D9c1E23fFFe168D63b4055'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_5", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_5' class='far fa-copy fa-fw'></i> </a></div></td><td><span class="badge bg-white border border-dark dark:border-white border-opacity-15 text-dark text-nowrap fw-medium transition-all rounded-pill py-1.5 px-2">
+                        <span class="hash-tag text-truncate" data-bs-toggle='tooltip' data-bs-title='Exchange'>Exchange</span>
+                    </span></td><td><span data-bs-toggle='tooltip' title='84,954,390.291322'>84,954,390.2913</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$84,921,512.94</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>6</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x02c79843b9548fc0cb4b35bf6840538a73fc3422' target='_parent' data-bs-toggle='tooltip' title='0x02c79843b9548fc0cb4b35bf6840538a73fc3422'><span data-highlight-target="0x02C79843B9548fC0Cb4B35Bf6840538a73fC3422">0x02C79843...a73fC3422</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x02C79843B9548fC0Cb4B35Bf6840538a73fC3422'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_6", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_6' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x02c79843b9548fc0cb4b35bf6840538a73fc3422#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>7</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x0bdca6aa876d9e5c5c6c27c0ecfa9a78ca6ca0a3' target='_parent' data-bs-toggle='tooltip' title='0x0bdca6aa876d9e5c5c6c27c0ecfa9a78ca6ca0a3'><span data-highlight-target="0x0Bdca6aA876d9e5C5c6C27C0ecFa9A78ca6cA0A3">0x0Bdca6aA...8ca6cA0A3</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x0Bdca6aA876d9e5C5c6C27C0ecFa9A78ca6cA0A3'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_7", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_7' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x0bdca6aa876d9e5c5c6c27c0ecfa9a78ca6ca0a3#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>8</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x255fbf4351683902ccb4d32f76987b886cc927bd' target='_parent' data-bs-toggle='tooltip' title='0x255fbf4351683902ccb4d32f76987b886cc927bd'><span data-highlight-target="0x255FBF4351683902Ccb4d32f76987B886Cc927bd">0x255FBF43...86Cc927bd</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x255FBF4351683902Ccb4d32f76987B886Cc927bd'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_8", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_8' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x255fbf4351683902ccb4d32f76987b886cc927bd#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>9</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x273c766d992a335b5a7c56ba41acf9ad85434877' target='_parent' data-bs-toggle='tooltip' title='0x273c766d992a335b5a7c56ba41acf9ad85434877'><span data-highlight-target="0x273c766d992A335B5A7C56BA41aCf9AD85434877">0x273c766d...D85434877</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x273c766d992A335B5A7C56BA41aCf9AD85434877'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_9", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_9' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x273c766d992a335b5a7c56ba41acf9ad85434877#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>10</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x2c0ecf1935b150d1cc63ced67aca7113322f2f9a' target='_parent' data-bs-toggle='tooltip' title='0x2c0ecf1935b150d1cc63ced67aca7113322f2f9a'><span data-highlight-target="0x2C0ecF1935b150d1Cc63cED67AcA7113322f2f9A">0x2C0ecF19...3322f2f9A</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x2C0ecF1935b150d1Cc63cED67AcA7113322f2f9A'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_10", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_10' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x2c0ecf1935b150d1cc63ced67aca7113322f2f9a#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>11</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x2d54471f9c2d82c7c767acc2eee8b82f0d2e2467' target='_parent' data-bs-toggle='tooltip' title='0x2d54471f9c2d82c7c767acc2eee8b82f0d2e2467'><span data-highlight-target="0x2D54471F9c2D82c7C767acC2EEE8b82f0D2e2467">0x2D54471F...f0D2e2467</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x2D54471F9c2D82c7C767acC2EEE8b82f0D2e2467'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_11", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_11' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x2d54471f9c2d82c7c767acc2eee8b82f0d2e2467#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>12</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x3f3a29b583b1450857eea8c6c88d72073d593910' target='_parent' data-bs-toggle='tooltip' title='0x3f3a29b583b1450857eea8c6c88d72073d593910'><span data-highlight-target="0x3F3A29b583b1450857eEA8c6c88D72073d593910">0x3F3A29b5...73d593910</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x3F3A29b583b1450857eEA8c6c88D72073d593910'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_12", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_12' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x3f3a29b583b1450857eea8c6c88d72073d593910#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>13</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x7ad7abbbdf1db119bdb47c97cf6f8c6541c8e79d' target='_parent' data-bs-toggle='tooltip' title='0x7ad7abbbdf1db119bdb47c97cf6f8c6541c8e79d'><span data-highlight-target="0x7ad7AbBbDf1DB119bDB47C97cF6F8c6541c8E79d">0x7ad7AbBb...541c8E79d</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x7ad7AbBbDf1DB119bDB47C97cF6F8c6541c8E79d'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_13", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_13' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x7ad7abbbdf1db119bdb47c97cf6f8c6541c8e79d#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>14</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x7d72f952824c9634229aceb9c0c328e1dd4e66fc' target='_parent' data-bs-toggle='tooltip' title='0x7d72f952824c9634229aceb9c0c328e1dd4e66fc'><span data-highlight-target="0x7d72F952824C9634229aCeB9C0c328E1dD4e66Fc">0x7d72F952...1dD4e66Fc</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x7d72F952824C9634229aCeB9C0c328E1dD4e66Fc'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_14", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_14' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x7d72f952824c9634229aceb9c0c328e1dd4e66fc#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>15</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x97c8af121d33045af0b6baa7248fda19be01e3c1' target='_parent' data-bs-toggle='tooltip' title='0x97c8af121d33045af0b6baa7248fda19be01e3c1'><span data-highlight-target="0x97C8AF121d33045af0b6baa7248fdA19be01E3C1">0x97C8AF12...9be01E3C1</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x97C8AF121d33045af0b6baa7248fdA19be01E3C1'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_15", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_15' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x97c8af121d33045af0b6baa7248fda19be01e3c1#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>16</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x9ca12796619c24eeeee9d701e87b2c3a956ba15f' target='_parent' data-bs-toggle='tooltip' title='0x9ca12796619c24eeeee9d701e87b2c3a956ba15f'><span data-highlight-target="0x9Ca12796619c24eEEeE9D701e87B2C3A956bA15f">0x9Ca12796...A956bA15f</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x9Ca12796619c24eEEeE9D701e87B2C3A956bA15f'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_16", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_16' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x9ca12796619c24eeeee9d701e87b2c3a956ba15f#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>17</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xba4c04812275b74241ef15b4a212dbcafd29a1ee' target='_parent' data-bs-toggle='tooltip' title='0xba4c04812275b74241ef15b4a212dbcafd29a1ee'><span data-highlight-target="0xBa4C04812275b74241Ef15B4a212DbcafD29A1ee">0xBa4C0481...afD29A1ee</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xBa4C04812275b74241Ef15B4a212DbcafD29A1ee'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_17", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_17' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xba4c04812275b74241ef15b4a212dbcafd29a1ee#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>18</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xcadacc42a1eba32adf69332b55a4ae1979396de1' target='_parent' data-bs-toggle='tooltip' title='0xcadacc42a1eba32adf69332b55a4ae1979396de1'><span data-highlight-target="0xcAdacC42a1eBa32adF69332B55a4AE1979396DE1">0xcAdacC42...979396DE1</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xcAdacC42a1eBa32adF69332B55a4AE1979396DE1'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_18", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_18' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xcadacc42a1eba32adf69332b55a4ae1979396de1#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>19</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xcea96b6ad107915cc1ff2af723940e23d1d29527' target='_parent' data-bs-toggle='tooltip' title='0xcea96b6ad107915cc1ff2af723940e23d1d29527'><span data-highlight-target="0xcEa96b6Ad107915cC1fF2aF723940e23d1D29527">0xcEa96b6A...3d1D29527</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xcEa96b6Ad107915cC1fF2aF723940e23d1D29527'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_19", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_19' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xcea96b6ad107915cc1ff2af723940e23d1d29527#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>20</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xe0126d34da4b8af7c1b99923171df011b7c79a4c' target='_parent' data-bs-toggle='tooltip' title='0xe0126d34da4b8af7c1b99923171df011b7c79a4c'><span data-highlight-target="0xe0126D34DA4b8aF7c1b99923171dF011b7c79a4c">0xe0126D34...1b7c79a4c</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xe0126D34DA4b8aF7c1b99923171dF011b7c79a4c'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_20", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_20' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xe0126d34da4b8af7c1b99923171df011b7c79a4c#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>21</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xe7a12de9afbcb35ec2b7223795702f2b44a80ed9' target='_parent' data-bs-toggle='tooltip' title='0xe7a12de9afbcb35ec2b7223795702f2b44a80ed9'><span data-highlight-target="0xe7A12DE9aFBcB35Ec2b7223795702F2b44a80Ed9">0xe7A12DE9...b44a80Ed9</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xe7A12DE9aFBcB35Ec2b7223795702F2b44a80Ed9'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_21", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_21' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xe7a12de9afbcb35ec2b7223795702f2b44a80ed9#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>22</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xead133f856c70234e530723faf546d88a1baeef2' target='_parent' data-bs-toggle='tooltip' title='0xead133f856c70234e530723faf546d88a1baeef2'><span data-highlight-target="0xead133F856C70234e530723fAf546d88A1baEeF2">0xead133F8...8A1baEeF2</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xead133F856C70234e530723fAf546d88A1baEeF2'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_22", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_22' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xead133f856c70234e530723faf546d88a1baeef2#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>23</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xf747d90a25310d437bcc11fe69c01cdd14794afc' target='_parent' data-bs-toggle='tooltip' title='0xf747d90a25310d437bcc11fe69c01cdd14794afc'><span data-highlight-target="0xF747D90a25310d437bCC11fE69C01CDD14794aFC">0xF747D90a...D14794aFC</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xF747D90a25310d437bCC11fE69C01CDD14794aFC'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_23", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_23' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xf747d90a25310d437bcc11fe69c01cdd14794afc#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>24</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xf76f5123c6b1c49c21adc8903cc571bd875eea4b' target='_parent' data-bs-toggle='tooltip' title='0xf76f5123c6b1c49c21adc8903cc571bd875eea4b'><span data-highlight-target="0xf76F5123C6B1C49C21adc8903Cc571bD875EEa4B">0xf76F5123...D875EEa4B</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xf76F5123C6B1C49C21adc8903Cc571bD875EEa4B'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_24", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_24' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xf76f5123c6b1c49c21adc8903cc571bd875eea4b#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>25</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xfa9b1c421ea3fb9974ef155729304f8d3a8c0294' target='_parent' data-bs-toggle='tooltip' title='0xfa9b1c421ea3fb9974ef155729304f8d3a8c0294'><span data-highlight-target="0xFA9b1C421ea3FB9974ef155729304F8d3A8C0294">0xFA9b1C42...d3A8C0294</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xFA9b1C421ea3FB9974ef155729304F8d3A8C0294'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_25", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_25' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='80,000,000.072'>80,000,000.0720</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,969,040.07</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xfa9b1c421ea3fb9974ef155729304f8d3a8c0294#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>26</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xec080e93eb78d31976e70c01c8ed8533ba4d7ada' target='_parent' data-bs-toggle='tooltip' title='0xec080e93eb78d31976e70c01c8ed8533ba4d7ada'><span data-highlight-target="0xeC080E93eb78D31976E70C01c8eD8533Ba4d7aDA">0xeC080E93...3Ba4d7aDA</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xeC080E93eb78D31976E70C01c8eD8533Ba4d7aDA'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_26", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_26' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='79,481,562.041528'>79,481,562.0415</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$79,450,802.68</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xec080e93eb78d31976e70c01c8ed8533ba4d7ada#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>27</td><td><div class='d-flex align-items-center gap-1'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xd62e55b19135eb3c645573288ee4b6050f86ff54' target='_parent' data-bs-toggle='tooltip' title='0xd62e55b19135eb3c645573288ee4b6050f86ff54'><span data-highlight-target="0xD62e55B19135eB3C645573288EE4B6050f86ff54">0xD62e55B1...50f86ff54</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xD62e55B19135eB3C645573288EE4B6050f86ff54'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_27", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_27' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='67,591,187.542'>67,591,187.5420</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$67,565,029.75</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xd62e55b19135eb3c645573288ee4b6050f86ff54#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>28</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x3f3750a5a8c874c639ce30812a9b162aaa9d9c29' target='_parent' data-bs-toggle='tooltip' title='0x3f3750a5a8c874c639ce30812a9b162aaa9d9c29'><span data-highlight-target="0x3F3750a5a8c874c639ce30812A9B162aAA9d9c29">0x3F3750a5...aAA9d9c29</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x3F3750a5a8c874c639ce30812A9B162aAA9d9c29'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_28", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_28' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='59,836,362.785342'>59,836,362.7853</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$59,813,206.11</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x3f3750a5a8c874c639ce30812a9b162aaa9d9c29#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>29</td><td><div class='d-flex align-items-center gap-1'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x6c561b446416e1a00e8e93e221854d6ea4171372' target='_parent' data-bs-toggle='tooltip' title='0x6c561b446416e1a00e8e93e221854d6ea4171372'><span data-highlight-target="0x6c561B446416E1A00E8E93E221854d6eA4171372">0x6c561B44...eA4171372</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x6c561B446416E1A00E8E93E221854d6eA4171372'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_29", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_29' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='37,103,857.516'>37,103,857.5160</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$37,089,498.32</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x6c561b446416e1a00e8e93e221854d6ea4171372#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>30</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x6867ef8c1904a10e31d856ebbc5d6acf91dbe48a' target='_parent' data-bs-toggle='tooltip' title='0x6867ef8c1904a10e31d856ebbc5d6acf91dbe48a'><span data-highlight-target="0x6867ef8c1904a10e31D856Ebbc5D6acF91DBe48a">0x6867ef8c...F91DBe48a</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x6867ef8c1904a10e31D856Ebbc5D6acF91DBe48a'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_30", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_30' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='33,932,836.968746'>33,932,836.9687</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$33,919,704.96</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x6867ef8c1904a10e31d856ebbc5d6acf91dbe48a#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>31</td><td><div class='d-flex align-items-center gap-1'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x944766f715b51967e56afde5f0aa76ceacc9e7f9' target='_parent' data-bs-toggle='tooltip' title='0x944766f715b51967e56afde5f0aa76ceacc9e7f9'><span data-highlight-target="0x944766f715b51967E56aFdE5f0Aa76cEaCc9E7f9">0x944766f7...EaCc9E7f9</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x944766f715b51967E56aFdE5f0Aa76cEaCc9E7f9'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_31", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_31' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='30,583,846.419683'>30,583,846.4197</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$30,572,010.47</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x944766f715b51967e56afde5f0aa76ceacc9e7f9#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>32</td><td><div class='d-flex align-items-center gap-1'><span data-bs-toggle='tooltip' title='Public Tag: Aave: aBasUSDC Token&#10;(0x4e65fe4dba92790696d040ac24aa414708f5c0ab)'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x4e65fe4dba92790696d040ac24aa414708f5c0ab' target='_parent'>Aave: aBasUSDC Token</a></span><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x4e65fE4DbA92790696d040ac24Aa414708F5c0AB'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_32", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_32' class='far fa-copy fa-fw'></i> </a></div></td><td><span class="badge bg-white border border-dark dark:border-white border-opacity-15 text-dark text-nowrap fw-medium transition-all rounded-pill py-1.5 px-2">
+                        <span class="hash-tag text-truncate" data-bs-toggle='tooltip' data-bs-title='Token Contract'>Token Contract</span>
+                    </span></td><td><span data-bs-toggle='tooltip' title='27,225,965.245161'>27,225,965.2452</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$27,215,428.80</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x4e65fe4dba92790696d040ac24aa414708f5c0ab#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>33</td><td><div class='d-flex align-items-center gap-1'><span data-bs-toggle='tooltip' title='Public Tag: Bybit: Hot Wallet 6&#10;(0xbaed383ede0e5d9d72430661f3285daa77e9439f)'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xbaed383ede0e5d9d72430661f3285daa77e9439f' target='_parent'>Bybit: Hot Wallet 6</a></span><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xBaeD383EDE0e5d9d72430661f3285DAa77E9439F'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_33", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_33' class='far fa-copy fa-fw'></i> </a></div></td><td><span class="badge bg-white border border-dark dark:border-white border-opacity-15 text-dark text-nowrap fw-medium transition-all rounded-pill py-1.5 px-2">
+                        <span class="hash-tag text-truncate" data-bs-toggle='tooltip' data-bs-title='Exchange'>Exchange</span>
+                    </span></td><td><span data-bs-toggle='tooltip' title='26,862,742.493091'>26,862,742.4931</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$26,852,346.61</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xbaed383ede0e5d9d72430661f3285daa77e9439f#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>34</td><td><div class='d-flex align-items-center gap-1'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x7501bc8bb51616f79bfa524e464fb7b41f0b10fb' target='_parent' data-bs-toggle='tooltip' title='0x7501bc8bb51616f79bfa524e464fb7b41f0b10fb'><span data-highlight-target="0x7501bc8Bb51616F79bfA524E464fb7B41f0B10fB">0x7501bc8B...41f0B10fB</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x7501bc8Bb51616F79bfA524E464fb7B41f0B10fB'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_34", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_34' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='19,817,519.519381'>19,817,519.5194</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$19,809,850.14</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x7501bc8bb51616f79bfa524e464fb7b41f0b10fb#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>35</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x5ebaa9a13ae36076e52c17035fbe253987e70a7c' target='_parent' data-bs-toggle='tooltip' title='0x5ebaa9a13ae36076e52c17035fbe253987e70a7c'><span data-highlight-target="0x5ebAa9a13aE36076e52C17035fBE253987e70a7C">0x5ebAa9a1...987e70a7C</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x5ebAa9a13aE36076e52C17035fBE253987e70a7C'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_35", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_35' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='19,499,914.01'>19,499,914.0100</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$19,492,367.54</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x5ebaa9a13ae36076e52c17035fbe253987e70a7c#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>36</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xaac391f166f33cdaefaa4afa6616a3bea66b694d' target='_parent' data-bs-toggle='tooltip' title='0xaac391f166f33cdaefaa4afa6616a3bea66b694d'><span data-highlight-target="0xaac391f166f33CdaEfaa4AfA6616A3BEA66B694d">0xaac391f1...EA66B694d</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xaac391f166f33CdaEfaa4AfA6616A3BEA66B694d'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_36", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_36' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='19,213,723.225927'>19,213,723.2259</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$19,206,287.52</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xaac391f166f33cdaefaa4afa6616a3bea66b694d#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>37</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x1743db32962afdef19c0cdae355f1ffdd267c143' target='_parent' data-bs-toggle='tooltip' title='0x1743db32962afdef19c0cdae355f1ffdd267c143'><span data-highlight-target="0x1743db32962afDef19C0Cdae355f1ffDD267C143">0x1743db32...DD267C143</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x1743db32962afDef19C0Cdae355f1ffDD267C143'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_37", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_37' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='16,554,075.506284'>16,554,075.5063</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$16,547,669.08</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x1743db32962afdef19c0cdae355f1ffdd267c143#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>38</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x80ce20a7608252936730f5b91ba907310fc41a7d' target='_parent' data-bs-toggle='tooltip' title='0x80ce20a7608252936730f5b91ba907310fc41a7d'><span data-highlight-target="0x80cE20a7608252936730f5b91ba907310fc41A7D">0x80cE20a7...10fc41A7D</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x80cE20a7608252936730f5b91ba907310fc41A7D'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_38", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_38' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='15,000,000.019838'>15,000,000.0198</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$14,994,195.02</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x80ce20a7608252936730f5b91ba907310fc41a7d#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>39</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x16d3209901173f78c60a64071ad1e3be5f70e3d5' target='_parent' data-bs-toggle='tooltip' title='0x16d3209901173f78c60a64071ad1e3be5f70e3d5'><span data-highlight-target="0x16D3209901173f78C60a64071aD1E3Be5F70e3d5">0x16D32099...e5F70e3d5</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x16D3209901173f78C60a64071aD1E3Be5F70e3d5'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_39", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_39' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='15,000,000.0135'>15,000,000.0135</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$14,994,195.01</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x16d3209901173f78c60a64071ad1e3be5f70e3d5#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>40</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x5bc66daa42a00cbadc1edc65a85ca1c2497d1577' target='_parent' data-bs-toggle='tooltip' title='0x5bc66daa42a00cbadc1edc65a85ca1c2497d1577'><span data-highlight-target="0x5BC66DAA42A00CBAdC1Edc65A85ca1C2497D1577">0x5BC66DAA...2497D1577</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x5BC66DAA42A00CBAdC1Edc65A85ca1C2497D1577'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_40", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_40' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='15,000,000.0135'>15,000,000.0135</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$14,994,195.01</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x5bc66daa42a00cbadc1edc65a85ca1c2497d1577#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>41</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xc1f4e54f27da2790eed0fe73b7411b8531051045' target='_parent' data-bs-toggle='tooltip' title='0xc1f4e54f27da2790eed0fe73b7411b8531051045'><span data-highlight-target="0xc1F4e54F27da2790eeD0FE73B7411B8531051045">0xc1F4e54F...531051045</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xc1F4e54F27da2790eeD0FE73B7411B8531051045'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_41", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_41' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='14,670,896.885699'>14,670,896.8857</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$14,665,219.25</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xc1f4e54f27da2790eed0fe73b7411b8531051045#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>42</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x14c8625a6d524f5122e127582b90a2fe780d1931' target='_parent' data-bs-toggle='tooltip' title='0x14c8625a6d524f5122e127582b90a2fe780d1931'><span data-highlight-target="0x14C8625A6d524F5122e127582b90A2Fe780d1931">0x14C8625A...e780d1931</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x14C8625A6d524F5122e127582b90A2Fe780d1931'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_42", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_42' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='14,656,525.3275'>14,656,525.3275</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$14,650,853.25</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x14c8625a6d524f5122e127582b90a2fe780d1931#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>43</td><td><div class='d-flex align-items-center gap-1'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x6cdcb1c4a4d1c3c6d054b27ac5b77e89eafb971d' target='_parent' data-bs-toggle='tooltip' title='0x6cdcb1c4a4d1c3c6d054b27ac5b77e89eafb971d'><span data-highlight-target="0x6cDcb1C4A4D1C3C6d054b27AC5B77e89eAFb971d">0x6cDcb1C4...9eAFb971d</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x6cDcb1C4A4D1C3C6d054b27AC5B77e89eAFb971d'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_43", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_43' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='12,854,928.672848'>12,854,928.6728</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$12,849,953.82</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x6cdcb1c4a4d1c3c6d054b27ac5b77e89eafb971d#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>44</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xec1d1168a26860d71ac7175734cfe7c63553f68a' target='_parent' data-bs-toggle='tooltip' title='0xec1d1168a26860d71ac7175734cfe7c63553f68a'><span data-highlight-target="0xEc1d1168a26860D71aC7175734CfE7c63553F68A">0xEc1d1168...63553F68A</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xEc1d1168a26860D71aC7175734CfE7c63553F68A'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_44", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_44' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='11,195,392.387813'>11,195,392.3878</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$11,191,059.77</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xec1d1168a26860d71ac7175734cfe7c63553f68a#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>45</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x655f4f2cd57e7104d001f5f2ae6dd5f821fb4c5d' target='_parent' data-bs-toggle='tooltip' title='0x655f4f2cd57e7104d001f5f2ae6dd5f821fb4c5d'><span data-highlight-target="0x655f4f2CD57e7104d001F5f2aE6dD5F821fb4c5d">0x655f4f2C...821fb4c5d</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x655f4f2CD57e7104d001F5f2aE6dD5F821fb4c5d'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_45", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_45' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='10,545,754.648977'>10,545,754.6490</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$10,541,673.44</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x655f4f2cd57e7104d001f5f2ae6dd5f821fb4c5d#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>46</td><td><div class='d-flex align-items-center gap-1'><span data-bs-toggle='tooltip' title='Public Tag: Bitget 35&#10;(0xffa8db7b38579e6a2d14f9b347a9ace4d044cd54)'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xffa8db7b38579e6a2d14f9b347a9ace4d044cd54' target='_parent'>Bitget 35</a></span><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xffa8DB7B38579e6A2D14f9B347a9acE4d044cD54'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_46", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_46' class='far fa-copy fa-fw'></i> </a></div></td><td><span class="badge bg-white border border-dark dark:border-white border-opacity-15 text-dark text-nowrap fw-medium transition-all rounded-pill py-1.5 px-2">
+                        <span class="hash-tag text-truncate" data-bs-toggle='tooltip' data-bs-title='Exchange'>Exchange</span>
+                    </span></td><td><span data-bs-toggle='tooltip' title='10,192,181.706676'>10,192,181.7067</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$10,188,237.33</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xffa8db7b38579e6a2d14f9b347a9ace4d044cd54#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>47</td><td><div class='d-flex align-items-center gap-1'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x9a17f715baf444303392fad997f9286f7dcd7bdd' target='_parent' data-bs-toggle='tooltip' title='0x9a17f715baf444303392fad997f9286f7dcd7bdd'><span data-highlight-target="0x9a17F715bAf444303392fAd997F9286f7DCd7BDd">0x9a17F715...f7DCd7BDd</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x9a17F715bAf444303392fAd997F9286f7DCd7BDd'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_47", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_47' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='9,687,721.236354'>9,687,721.2364</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$9,683,972.09</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x9a17f715baf444303392fad997f9286f7dcd7bdd#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>48</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x4d91619a02b55a817930f22c444560933dabf7cd' target='_parent' data-bs-toggle='tooltip' title='0x4d91619a02b55a817930f22c444560933dabf7cd'><span data-highlight-target="0x4d91619a02B55a817930f22C444560933dabF7Cd">0x4d91619a...33dabF7Cd</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0x4d91619a02B55a817930f22C444560933dabF7Cd'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_48", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_48' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='9,491,970.730026'>9,491,970.7300</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$9,488,297.34</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0x4d91619a02b55a817930f22c444560933dabf7cd#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>49</td><td><div class='d-flex align-items-center gap-1'> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xfe610c3dcbb01bb165e6132933bc1137117d49cd' target='_parent' data-bs-toggle='tooltip' title='0xfe610c3dcbb01bb165e6132933bc1137117d49cd'><span data-highlight-target="0xfE610C3DCbB01BB165E6132933bc1137117d49CD">0xfE610C3D...7117d49CD</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xfE610C3DCbB01BB165E6132933bc1137117d49CD'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_49", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_49' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='9,459,247.207734'>9,459,247.2077</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$9,455,586.48</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xfe610c3dcbb01bb165e6132933bc1137117d49cd#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr><tr><td>50</td><td><div class='d-flex align-items-center gap-1'><i class="far fa-memo text-secondary " data-bs-toggle="tooltip" data-bs-title="Contract"></i> <a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xb3c77ede8f91fb1ec0f48f4e8f696a245438cc11' target='_parent' data-bs-toggle='tooltip' title='0xb3c77ede8f91fb1ec0f48f4e8f696a245438cc11'><span data-highlight-target="0xB3C77edE8f91fb1EC0f48F4E8F696a245438cC11">0xB3C77edE...45438cC11</span></a><a class='js-clipboard link-secondary  ' href='javascript:;' data-clipboard-text='0xB3C77edE8f91fb1EC0f48F4E8F696a245438cC11'   data-bs-toggle='tooltip' data-bs-trigger='hover' title='Copy Address' data-hs-clipboard-options='{ "type": "tooltip", "successText": "Copied!", "classChangeTarget": "#linkIcon_addr_50", "defaultClass": "fa-copy", "successClass": "fa-check" }' ><i id='linkIcon_addr_50' class='far fa-copy fa-fw'></i> </a></div></td><td></td><td><span data-bs-toggle='tooltip' title='8,985,001.00001'>8,985,001.0000</span></td><td>0.0000% <div class="progress mt-1" style="height:2px;"><div class="progress-bar bg-primary" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div></td><td>$8,981,523.80</td><td class="text-center"><a href='/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913?a=0xb3c77ede8f91fb1ec0f48f4e8f696a245438cc11#analytics' target='_parent' class="btn btn-white btn-sm"><i class="far fa-chart-simple fa-fw"></i></a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- End Table -->
+
+            <!-- Table Footer -->
+            <div id="divCardFooterHolders" class="card-footer d-flex justify-content-md-end align-items-center text-secondary">
+                <div class="d-inline-block">
+                    <ul class="pagination pagination-sm mb-0"><li class="page-item disabled"><span class="page-link" >First</span></li><li class="page-item disabled"><span class="page-link px-3" ><i class="fa fa-chevron-left small"></i></span><span class="sr-only">Previous</span></li><li class="page-item disabled"><span class="page-link text-nowrap">Page 1 of 20</span></li><li class="page-item" data-bs-toggle='tooltip' title="Go to Next"><a class="page-link px-3" href="javascript:move('generic-tokenholders2?a=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&amp;sid=&amp;m=light&amp;s=0&amp;p=2')" aria-label="Next"><span aria-hidden="True"><i class="fa fa-chevron-right small"></i></span> <span class="sr-only">Next</span></a></li><li class="page-item"><a class="page-link" href="javascript:move('generic-tokenholders2?a=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&amp;sid=&amp;m=light&amp;s=0&amp;p=20')"><span aria-hidden="True">Last</span><span class="sr-only">Last</span></a></li>
+                </div>
+            </div>
+            <!-- End Table Footer -->
+        </div>
+    </div>
+</body>
+<script src="/assets/vendor/jquery/dist/jquery.min.js?v=26.6.4.0"></script>
+<script src="/assets/vendor/popper.js/dist/umd/popper.min.js?v=26.6.4.0"></script>
+<script src="/assets/vendor/bootstrap/bootstrap.bundle.min.js?v=26.6.4.0"></script>
+<script src="/assets/vendor/clipboard/dist/clipboard.min.js?v=26.6.4.0"></script>
+<script src="/assets/js/app.min.js?v=26.6.4.0"></script>
+<script type="text/javascript" src="/assets/js/custom/commonjs.js?v=26.6.4.0"></script>
+    
+<script src="/assets/highcharts/v/highcharts.js?v=26.6.4.0"></script>
+
+<!-- JS Init. -->
+<script>
+    (function () {
+        // INITIALIZATION OF CLIPBOARD
+        HSCore.components.HSClipboard.init('.js-clipboard');
+    })();
+</script>
+
+<script>
+    var isErc20Token = 'true';
+    $(window).on('load', function () {
+        $('#overlay').fadeOut();        
+        window.parent.document.getElementById('loadingtxframe2').style.display = 'none';
+    });
+
+    function move(strlink) {
+        $('#overlay').show();
+        $('#overlay').fadeIn();
+        window.location = "/token/" + strlink.replace('+', '%2b');
+    }
+
+    $(document).ready(function () {
+        $('.page-link').click(function () {
+            window.parent.document.getElementById('overlayMain').style.display = 'block';
+        });
+
+        $("[data-bs-toggle='tooltip']").tooltip();
+
+        const clipboard = new ClipboardJS('.js-clipboard');
+        clipboard.on('success', function (e) {
+            $('.tooltip-inner').html('Copied!');
+            $(e.trigger).tooltip('update');
+            //e.clearSelection();
+        });
+
+        setTimeout(function () {
+            window.parent.token_holders_loaded = true;
+            var obj = window.parent.document.getElementById('tokeholdersiframe');
+            parent.resizeIframe(obj, -19);
+            window.parent.isFrameLoading = false;
+            window.parent.document.getElementById('overlayMain').style.display = 'none';
+        }, 200);
+
+        // Quick export csv
+        const tokenId = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
+        const quickExportTokenHolerData = '[["1","0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb","Morpho: Morpho","195,270,620.9949","0.0000%","$195,195,051.26"],["2","0x8da91a6298ea5d1a8bc985e99798fd0a0f05701a",null,"160,000,000.210698","0.0000%","$159,938,080.21"],["3","0xb026ba5501c9fcdb5b4b746c37e349cd61b81b22",null,"158,707,811.660177","0.0000%","$158,646,391.74"],["4","0x0ccc149f4c01a2eada3e9f915ca7628920901623",null,"86,991,146.922079","0.0000%","$86,957,481.35"],["5","0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055","Binance: Hot Wallet 34","84,954,390.291322","0.0000%","$84,921,512.94"],["6","0x02c79843b9548fc0cb4b35bf6840538a73fc3422",null,"80,000,000.072","0.0000%","$79,969,040.07"],["7","0x0bdca6aa876d9e5c5c6c27c0ecfa9a78ca6ca0a3",null,"80,000,000.072","0.0000%","$79,969,040.07"],["8","0x255fbf4351683902ccb4d32f76987b886cc927bd",null,"80,000,000.072","0.0000%","$79,969,040.07"],["9","0x273c766d992a335b5a7c56ba41acf9ad85434877",null,"80,000,000.072","0.0000%","$79,969,040.07"],["10","0x2c0ecf1935b150d1cc63ced67aca7113322f2f9a",null,"80,000,000.072","0.0000%","$79,969,040.07"],["11","0x2d54471f9c2d82c7c767acc2eee8b82f0d2e2467",null,"80,000,000.072","0.0000%","$79,969,040.07"],["12","0x3f3a29b583b1450857eea8c6c88d72073d593910",null,"80,000,000.072","0.0000%","$79,969,040.07"],["13","0x7ad7abbbdf1db119bdb47c97cf6f8c6541c8e79d",null,"80,000,000.072","0.0000%","$79,969,040.07"],["14","0x7d72f952824c9634229aceb9c0c328e1dd4e66fc",null,"80,000,000.072","0.0000%","$79,969,040.07"],["15","0x97c8af121d33045af0b6baa7248fda19be01e3c1",null,"80,000,000.072","0.0000%","$79,969,040.07"],["16","0x9ca12796619c24eeeee9d701e87b2c3a956ba15f",null,"80,000,000.072","0.0000%","$79,969,040.07"],["17","0xba4c04812275b74241ef15b4a212dbcafd29a1ee",null,"80,000,000.072","0.0000%","$79,969,040.07"],["18","0xcadacc42a1eba32adf69332b55a4ae1979396de1",null,"80,000,000.072","0.0000%","$79,969,040.07"],["19","0xcea96b6ad107915cc1ff2af723940e23d1d29527",null,"80,000,000.072","0.0000%","$79,969,040.07"],["20","0xe0126d34da4b8af7c1b99923171df011b7c79a4c",null,"80,000,000.072","0.0000%","$79,969,040.07"],["21","0xe7a12de9afbcb35ec2b7223795702f2b44a80ed9",null,"80,000,000.072","0.0000%","$79,969,040.07"],["22","0xead133f856c70234e530723faf546d88a1baeef2",null,"80,000,000.072","0.0000%","$79,969,040.07"],["23","0xf747d90a25310d437bcc11fe69c01cdd14794afc",null,"80,000,000.072","0.0000%","$79,969,040.07"],["24","0xf76f5123c6b1c49c21adc8903cc571bd875eea4b",null,"80,000,000.072","0.0000%","$79,969,040.07"],["25","0xfa9b1c421ea3fb9974ef155729304f8d3a8c0294",null,"80,000,000.072","0.0000%","$79,969,040.07"],["26","0xec080e93eb78d31976e70c01c8ed8533ba4d7ada",null,"79,481,562.041528","0.0000%","$79,450,802.68"],["27","0xd62e55b19135eb3c645573288ee4b6050f86ff54",null,"67,591,187.542","0.0000%","$67,565,029.75"],["28","0x3f3750a5a8c874c639ce30812a9b162aaa9d9c29",null,"59,836,362.785342","0.0000%","$59,813,206.11"],["29","0x6c561b446416e1a00e8e93e221854d6ea4171372",null,"37,103,857.516","0.0000%","$37,089,498.32"],["30","0x6867ef8c1904a10e31d856ebbc5d6acf91dbe48a",null,"33,932,836.968746","0.0000%","$33,919,704.96"],["31","0x944766f715b51967e56afde5f0aa76ceacc9e7f9",null,"30,583,846.419683","0.0000%","$30,572,010.47"],["32","0x4e65fe4dba92790696d040ac24aa414708f5c0ab","Aave: aBasUSDC Token","27,225,965.245161","0.0000%","$27,215,428.80"],["33","0xbaed383ede0e5d9d72430661f3285daa77e9439f","Bybit: Hot Wallet 6","26,862,742.493091","0.0000%","$26,852,346.61"],["34","0x7501bc8bb51616f79bfa524e464fb7b41f0b10fb",null,"19,817,519.519381","0.0000%","$19,809,850.14"],["35","0x5ebaa9a13ae36076e52c17035fbe253987e70a7c",null,"19,499,914.01","0.0000%","$19,492,367.54"],["36","0xaac391f166f33cdaefaa4afa6616a3bea66b694d",null,"19,213,723.225927","0.0000%","$19,206,287.52"],["37","0x1743db32962afdef19c0cdae355f1ffdd267c143",null,"16,554,075.506284","0.0000%","$16,547,669.08"],["38","0x80ce20a7608252936730f5b91ba907310fc41a7d",null,"15,000,000.019838","0.0000%","$14,994,195.02"],["39","0x16d3209901173f78c60a64071ad1e3be5f70e3d5",null,"15,000,000.0135","0.0000%","$14,994,195.01"],["40","0x5bc66daa42a00cbadc1edc65a85ca1c2497d1577",null,"15,000,000.0135","0.0000%","$14,994,195.01"],["41","0xc1f4e54f27da2790eed0fe73b7411b8531051045",null,"14,670,896.885699","0.0000%","$14,665,219.25"],["42","0x14c8625a6d524f5122e127582b90a2fe780d1931",null,"14,656,525.3275","0.0000%","$14,650,853.25"],["43","0x6cdcb1c4a4d1c3c6d054b27ac5b77e89eafb971d",null,"12,854,928.672848","0.0000%","$12,849,953.82"],["44","0xec1d1168a26860d71ac7175734cfe7c63553f68a",null,"11,195,392.387813","0.0000%","$11,191,059.77"],["45","0x655f4f2cd57e7104d001f5f2ae6dd5f821fb4c5d",null,"10,545,754.648977","0.0000%","$10,541,673.44"],["46","0xffa8db7b38579e6a2d14f9b347a9ace4d044cd54","Bitget 35","10,192,181.706676","0.0000%","$10,188,237.33"],["47","0x9a17f715baf444303392fad997f9286f7dcd7bdd",null,"9,687,721.236354","0.0000%","$9,683,972.09"],["48","0x4d91619a02b55a817930f22c444560933dabf7cd",null,"9,491,970.730026","0.0000%","$9,488,297.34"],["49","0xfe610c3dcbb01bb165e6132933bc1137117d49cd",null,"9,459,247.207734","0.0000%","$9,455,586.48"],["50","0xb3c77ede8f91fb1ec0f48f4e8f696a245438cc11",null,"8,985,001.00001","0.0000%","$8,981,523.80"]]';
+        const quickExportTokenHolerTitle = 'Rank,Address,Address_Nametag,Quantity,Percentage,Value';
+        let isExportFinish = true;
+        if ($("#btnExportQuickTokenHolerCSV").length > 0 && quickExportTokenHolerData) {
+            $("#btnExportQuickTokenHolerCSV").click(function () {
+                if (isExportFinish == true) {
+                    isExportFinish = false;
+                    $("#btnExportQuickTokenHolerCSV").append('<i class="fa fa-spinner fa-spin ms-1"></i>');
+                    let lstTxsObj = JSON.parse(quickExportTokenHolerData);
+                    if (lstTxsObj.length > 0) {
+                        let csvRows = [];
+                        csvRows.push(quickExportTokenHolerTitle.replace(/"/g, ""));
+                        for (let i = 0; i < lstTxsObj.length; i++) {
+                            let values = Object.values(lstTxsObj[i]).join('2SL'); // 2SL : separate line
+                            values = values.replace(/2SL/g, '","')
+                            csvRows.push('"' + values + '"');
+                        }
+                        let data = csvRows.join('\n');
+                        let fileName = "export-token-" + tokenId;
+                        const blob = new Blob(["\ufeff", data], { type: 'text/csv' });
+                        const url = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.setAttribute('href', url)
+                        a.setAttribute('download', fileName + '.csv');
+                        a.click();
+                        setTimeout(function () {
+                            $("#btnExportQuickTokenHolerCSV").find(".fa-spinner").remove();
+                            isExportFinish = true;
+                        }, 200);
+                    }
+                }
+            });
+        }
+
+
+        
+        if (isErc20Token?.toLowerCase() == "true") {
+            $("#btnViewTokenFlowChart").on("click", function () {
+                window.parent.showTokenFlowChartModal();
+            });
+            if (window.location.hash.indexOf("flow") > -1) {
+                window.parent.showTokenFlowChartModal();
+            }
+        }
+        
+
+    });
+
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        registerOverviewToggle();
+
+        renderHoldersConcentrationChart();
+
+        renderHoldersTierDistributionChart();
+
+        renderThresholdDepthChart();
+    });
+
+    function registerOverviewToggle() {
+        var holdersVisibilitySwitches = document.querySelectorAll('input[type="checkbox"][data-target]');
+        if (!holdersVisibilitySwitches.length) return;
+
+        holdersVisibilitySwitches.forEach(function (toggle) {
+            var targetName = toggle.getAttribute('data-target');
+            if (!targetName) return;
+
+            var targetSections = document.querySelectorAll('[data-toggle-section="' + targetName + '"]');
+            if (!targetSections.length) return;
+
+            var applyVisibility = function () {
+                var shouldShow = Boolean(toggle.checked);
+
+                targetSections.forEach(function (section) {
+                    section.classList.toggle('d-none', !shouldShow);
+                });
+
+                if (shouldShow && typeof window !== 'undefined') {
+                    window.requestAnimationFrame(function () {
+                        window.dispatchEvent(new Event('resize'));
+                    });
+                }
+            };
+
+            toggle.addEventListener('change', applyVisibility);
+            applyVisibility();
+        });
+    }
+
+    const defaultConfig = {
+        selectors: {
+            summary: {
+                topDefinition: '#holdersTopDefinition',
+                totalCount: '#holdersTotalCount',
+                snapshotAgo: '#holdersSnapshotAgo',
+                topCohortShare: '#holdersOverviewTopCohortShareValue',
+                whaleShare: '#holdersOverviewWhaleShareValue',
+                giniValue: '#holdersOverviewGiniCoefficientValue',
+                giniStatusIcon: '#holdersOverviewGiniStatusIcon'
+            },
+            concentration: {
+                insight: '#holdersOverviewConcentrationInsightText',
+                rowsWrap: '#holdersOverviewConcentrationRows',
+                rowTemplate: '#holdersOverviewConcentrationRowTemplate',
+                chartTabId: 'transfer-24h',
+                chartContainerId: 'holdersConcentrationDonut',
+                chartFallbackId: 'holdersConcentrationDonutFallback',
+                legendId: 'holdersConcentrationLegend'
+            },
+            tier: {
+                insight: '#holdersTierInsightText',
+                rowsWrap: '#holdersTierBreakdown',
+                rowTemplate: '#holdersTierCardTemplate',
+                chartTabId: 'tier-dist-chart-tab',
+                chartContainerId: 'holdersTierDistributionChart',
+                chartFallbackId: 'holdersTierDistributionChartFallback'
+            },
+            threshold: {
+                rowsWrap: '#holdersThresholdRows',
+                rowTemplate: '#holdersThresholdRowTemplate',
+                chartTabId: 'wallet-depth-chart-tab',
+                chartContainerId: 'holdersThresholdDepthChart',
+                chartFallbackId: 'holdersThresholdDepthChartFallback'
+            },
+            topHolders: {
+                rowsWrap: '#holdersTopRows',
+                rowTemplate: '#holdersTopRowTemplate'
+            },
+            entity: {
+                taggedValue: '#entityTaggedValue',
+                untaggedValue: '#entityUntaggedValue',
+                taggedShare: '#entityTaggedShare',
+                untaggedShare: '#entityUntaggedShare',
+                observed: '#holdersEntityObserved',
+                narrative: '#holdersEntityNarrative'
+            },
+            gauge: {
+                containerId: 'gaugeContainer',
+                progressId: 'gaugeProgress',
+                valueId: 'gaugeValue'
+            }
+        },
+        charts: {
+            concentration: {
+                center: ['50%', '44%'],
+                size: '54%',
+                innerSize: '83%',
+                segmentColors: {
+                    top1To5: '#004FEE',
+                    top6To10: '#37D1FE',
+                    top11To25: '#FF7C62',
+                    top26To50: '#5E93FF',
+                    top51To100: '#A967FF',
+                    outside100: '#DDE2E6'
+                }
+            },
+            tier: {
+                palette: {
+                    Whale: '#0F57FF',
+                    Dolphin: '#0F57FF',
+                    Fish: '#0F57FF',
+                    Crab: '#0F57FF',
+                    Shrimp: '#0F57FF'
+                },
+                spacing: [6, 10, 10, 6],
+                minScaleMax: 6,
+                axisTopPadding: 0.35,
+                pointWidth: 10
+            },
+            threshold: {
+                barColor: '#1ABC9C',
+                spacing: [6, 10, 10, 6],
+                axisTopTickValue: 5000000,
+                axisTopPadding: 0.35,
+                pointWidth: 10
+            }
+        },
+        theme: {
+            darkModes: ['dark', 'dim']
+        }
+    };
+
+    // holdersConcentration
+    //
+    const holdersConcentrationData = '[{"name": "Top 1-5", "value": 16.290003235026589872312869650, "color": "#004FEE", "amountUsd": 684791316.79, "amountLabel": "$684.79 M"},{"name": "Top 6-10", "value": 9.512017170132916575625970880, "color": "#37D1FE", "amountUsd": 399861600.35, "amountLabel": "$399.86 M"},{"name": "Top 11-25", "value": 28.536051510398749726877912630, "color": "#FF7C62", "amountUsd": 1199584801.05, "amountLabel": "$1.20 B"},{"name": "Top 26-50", "value": 14.163827434438656389511707180, "color": "#5E93FF", "amountUsd": 595412161.66, "amountLabel": "$595.41 M"},{"name": "Top 51-100", "value": 5.7017306606373325114464552300, "color": "#A967FF", "amountUsd": 239686609.68, "amountLabel": "$239.69 M"},{"name": "Outside 100", "value": 25.796369989365754924225084440, "color": "#DDE2E6", "amountUsd": 1084415387.68, "amountLabel": "$1.08 B"}]';
+    const holdersConcentrationTotalUsdValue = '$4.20 B';
+    let holdersConcentrationChart = null;
+    function renderHoldersConcentrationChart() {
+        const chartContainer = document.getElementById(defaultConfig.selectors.concentration.chartContainerId);
+        const fallback = document.getElementById(defaultConfig.selectors.concentration.chartFallbackId);
+        if (!chartContainer) return;
+
+        const showFallback = function (message) {
+            chartContainer.style.display = 'none';
+            if (!fallback) return;
+            const fallbackText = fallback.querySelector('span');
+            if (fallbackText) fallbackText.textContent = message;
+            fallback.classList.remove('d-none');
+        };
+
+        if (typeof window.Highcharts === 'undefined') {
+            showFallback('Chart unavailable: failed to load chart library.');
+            return;
+        }
+
+        const pieSegments = JSON.parse(holdersConcentrationData);
+        renderHoldersConcentrationLegend(pieSegments);
+
+        const chartData = pieSegments.map(function (segment) {
+            return {
+                name: segment.name,
+                y: segment.value,
+                color: segment.color,
+                custom: {
+                    amountUsd: segment.amountUsd,
+                    amountLabel: segment.amountLabel
+                }
+            };
+        });
+
+        const hasData = chartData.some(function (segment) { return segment.y > 0; });
+        if (!hasData) {
+            showFallback('Chart unavailable: no concentration data.');
+            return;
+        }
+
+        chartContainer.style.display = '';
+        if (fallback) fallback.classList.add('d-none');
+
+        if (holdersConcentrationChart) {
+            holdersConcentrationChart.series[0].setData(chartData, true, false, false);
+            holdersConcentrationChart.reflow();
+            return;
+        }
+
+        holdersConcentrationChart = window.Highcharts.chart(defaultConfig.selectors.concentration.chartContainerId, {
+            chart: {
+                type: 'pie',
+                custom: {},
+                backgroundColor: 'transparent',
+                spacing: [0, 0, 0, 0],
+                animation: false,
+                events: {
+                    render: function () {
+                        const chart = this;
+                        const series = chart.series[0];
+                        const centerText = `<strong>${holdersConcentrationTotalUsdValue}</strong>`;
+                        let customLabel = chart.options.chart.custom.label;
+
+                        if (!customLabel) {
+                            customLabel = chart.options.chart.custom.label = chart.renderer
+                                .label(centerText)
+                                .css({
+                                    color: '#000',
+                                    textAnchor: 'middle',
+                                })
+                                .add();
+                        } else {
+                            customLabel.attr({
+                                text: centerText,
+                            });
+                        }
+
+                        const x = series.center[0] + chart.plotLeft;
+                        const y = series.center[1] + chart.plotTop - customLabel.attr('height') / 2;
+                        customLabel.attr({
+                            x: x,
+                            y: y,
+                        });
+                        customLabel.css({
+                            fontSize: `${series.center[2] / 10}px`,
+                        });
+                    },
+                },
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%',
+                },
+            },
+            title: {
+                text: '',
+            },
+            tooltip: {
+                useHTML: true,
+                formatter: function () {
+                    const safePointColor = escapeHtml(this.point.color);
+                    const safePointName = escapeHtml(this.point.name);
+                    return `<div class="card shadow" style="border-radius: 0.5rem; display: inline-block; min-width: 10rem; max-width: none; white-space: nowrap">
+                          <ul class="list-group list-group-flush">
+                            <li class="list-group-item px-2 py-1.5">
+                              <div class="fw-medium" style="font-weight: 500 !important">Usage</div>
+                            </li>
+                            <li class="list-group-item px-2 py-1.5 d-flex align-items-center justify-content-between gap-4">
+                              <div>
+                                <i class="fas fa-circle fa-2xs me-0.5" style="color: ${safePointColor};"></i>
+                                <span class="text-muted fw-medium">${safePointName}</span>
+                              </div>
+                              <div class="text-muted fw-medium">${Math.round(this.point.percentage)}%</div>
+                            </li>
+                          </ul>
+                        </div>`;
+                },
+            },
+            legend: {
+                enabled: false,
+            },
+            plotOptions: {
+                series: {
+                    animation: false,
+                },
+                pie: {
+                    animation: false,
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    showInLegend: true,
+                    states: {
+                        hover: {
+                            halo: {
+                                size: 5,
+                            },
+                        },
+                    },
+                    startAngle: 0,
+                    center: defaultConfig.charts.concentration.center,
+                    size: defaultConfig.charts.concentration.size,
+                    innerSize: defaultConfig.charts.concentration.innerSize,
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function () {
+                            return this.point.options.custom.amountLabel;
+                        },
+                    },
+                },
+            },
+            series: [
+                {
+                    name: 'Holder Concentration',
+                    data: chartData,
+                },
+            ],
+            credits: {
+                enabled: false,
+            },
+            exporting: {
+                enabled: false,
+            },
+        });
+    }
+    function renderHoldersConcentrationLegend(pieSegments) {
+        const legendWrap = document.getElementById(defaultConfig.selectors.concentration.legendId);
+        if (!legendWrap) return;
+        legendWrap.replaceChildren();
+
+        pieSegments.forEach(function (segment) {
+            const item = document.createElement('span');
+            item.className = 'd-inline-flex align-items-center gap-1.5';
+
+            const dot = document.createElement('i');
+            dot.className = 'fas fa-circle fa-2xs';
+            dot.style.color = segment.color;
+
+            const label = document.createElement('span');
+            label.className = 'text-muted';
+            label.textContent = `${segment.name}:`;
+
+            const value = document.createElement('span');
+            value.className = 'fw-medium';
+            value.textContent = `${Math.round(segment.value)}%`;
+
+            item.appendChild(dot);
+            item.appendChild(label);
+            item.appendChild(value);
+            legendWrap.appendChild(item);
+        });
+    };
+
+    // holdersTierDistributionChart
+    //
+    const holdersTierDistributionData = '[{ "name": "Whale", "y": 3.23095955574857, "color": "#0F57FF", "custom": { "rawPercent": 0.0172659727747463, "holders": 1702, "marketCapShare": 87.77375765833467408803246035, "scaledHolders": 3.23095955574857 } },{ "name": "Shark", "y": 4.01552740431379, "color": "#0F57FF", "custom": { "rawPercent": 0.105137803664789, "holders": 10364, "marketCapShare": 7.0879585442553294412020266900, "scaledHolders": 4.01552740431379 } },{ "name": "Dolphin", "y": 4.65669219424939, "color": "#0F57FF", "custom": { "rawPercent": 0.460175709170413, "holders": 45362, "marketCapShare": 3.327247240453929883432241100, "scaledHolders": 4.65669219424939 } },{ "name": "Fish", "y": 5.21963952987284, "color": "#0F57FF", "custom": { "rawPercent": 1.68217442507709, "holders": 165821, "marketCapShare": 1.2411779975137083050351787600, "scaledHolders": 5.21963952987284 } },{ "name": "Crab", "y": 5.76889401542467, "color": "#0F57FF", "custom": { "rawPercent": 5.95834315238317, "holders": 587346, "marketCapShare": 0.4377656300260438082213030700, "scaledHolders": 5.76889401542467 } },{ "name": "Shrimp", "y": 6.95650190207018, "color": "#0F57FF", "custom": { "rawPercent": 91.7769029369298, "holders": 9046944, "marketCapShare": 0.1320929291784317376047952100, "scaledHolders": 6.95650190207018 } }]';
+    let holdersTierDistributionChart = null;
+    function renderHoldersTierDistributionChart() {
+        const chartContainer = document.getElementById(defaultConfig.selectors.tier.chartContainerId);
+        const fallback = document.getElementById(defaultConfig.selectors.tier.chartFallbackId);
+        if (!chartContainer) return;
+
+        const showFallback = function (message) {
+            chartContainer.style.display = 'none';
+            if (!fallback) return;
+            const fallbackText = fallback.querySelector('span');
+            if (fallbackText) fallbackText.textContent = message;
+            fallback.classList.remove('d-none');
+        };
+
+        if (typeof window.Highcharts === 'undefined') {
+            showFallback('Chart unavailable: failed to load chart library.');
+            return;
+        }
+
+        const chartData = JSON.parse(holdersTierDistributionData);
+
+        if (!chartData.length) {
+            showFallback('Chart unavailable: no tier distribution data.');
+            return;
+        }
+
+        const categories = chartData.map(function (point) { return point.name; });
+        const seriesData = chartData.map(function (point) {
+            return {
+                name: point.name,
+                y: point.y,
+                color: point.color,
+                custom: point.custom
+            };
+        });
+        const tierScaleMax = Math.max(defaultConfig.charts.tier.minScaleMax, Math.ceil(seriesData.reduce(function (max, point) {
+            return Math.max(max, point.y);
+        }, 0)));
+        const tierAxisMax = tierScaleMax + defaultConfig.charts.tier.axisTopPadding;
+        const tierTickPositions = buildThresholdScaleTickPositions(tierScaleMax);
+
+        chartContainer.style.display = '';
+        if (fallback) fallback.classList.add('d-none');
+
+        if (holdersTierDistributionChart) {
+            holdersTierDistributionChart.xAxis[0].setCategories(categories, false);
+            holdersTierDistributionChart.series[0].setData(seriesData, false, false, false);
+            holdersTierDistributionChart.yAxis[0].update({
+                max: tierAxisMax,
+                tickPositions: tierTickPositions
+            }, false);
+            holdersTierDistributionChart.redraw(false);
+            holdersTierDistributionChart.reflow();
+            return;
+        }
+
+
+        holdersTierDistributionChart = window.Highcharts.chart(defaultConfig.selectors.tier.chartContainerId, {
+            chart: {
+                type: 'bar',
+                backgroundColor: 'transparent',
+                animation: false,
+                spacing: defaultConfig.charts.tier.spacing
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: categories,
+                title: {
+                    text: null
+                },
+                gridLineWidth: 0,
+                gridLineColor: 'transparent',
+                minorGridLineWidth: 0,
+                lineWidth: 0,
+                tickWidth: 0,
+                labels: {
+                    y: 4,
+                    style: {
+                        color: 'var(--bs-secondary-color)',
+                        fontSize: '10px',
+                        fontWeight: '500'
+                    }
+                }
+            },
+            yAxis: {
+                min: 0,
+                max: tierAxisMax,
+                tickPositions: tierTickPositions,
+                title: {
+                    text: null
+                },
+                gridLineWidth: 1,
+                gridLineDashStyle: 'dash',
+                gridLineColor: 'var(--bs-border-color)',
+                lineColor: 'var(--bs-border-color)',
+                tickColor: 'var(--bs-border-color)',
+                labels: {
+                    reserveSpace: true,
+                    overflow: 'allow',
+                    autoRotation: false,
+                    rotation: 0,
+                    style: {
+                        color: 'var(--bs-secondary-color)',
+                        fontSize: '9px'
+                    },
+                    formatter: function () {
+                        return formatThresholdScaleTickLabel(this.value);
+                    }
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    animation: false,
+                    clip: false
+                },
+                bar: {
+                    borderWidth: 0,
+                    borderRadius: 3,
+                    pointPadding: 0.1,
+                    groupPadding: 0.05,
+                    pointWidth: defaultConfig.charts.tier.pointWidth,
+                    dataLabels: {
+                        enabled: true,
+                        crop: true,
+                        overflow: 'justify',
+                        allowOverlap: false,
+                        verticalAlign: 'middle',
+                        align: 'left',
+                        x: 4,
+                        y: -1.5,
+                        formatter: function () {
+                            return formatPercentFloor(this.point.options.custom.rawPercent, 2, 0.1);
+                        },
+                        style: {
+                            fontWeight: 'normal',
+                            fontSize: '9px',
+                            textOutline: 'none',
+                            color: 'var(--bs-body-color)'
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                useHTML: true,
+                formatter: function () {
+                    const custom = this.point.options.custom;
+                    const safePointName = escapeHtml(this.point.name);
+                    return `
+                  <div class="card shadow" style="border-radius: 0.5rem;">
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item px-2 py-1.5">
+                        <div class="fw-medium" style="font-weight: 500 !important;">${safePointName}</div>
+                      </li>
+                      <li class="list-group-item px-2 py-1.5 d-flex align-items-center justify-content-between gap-4">
+                        <span class="text-muted fw-medium">% Holders</span>
+                        <span class="fw-medium">${formatPercent(custom.rawPercent, 2)}</span>
+                      </li>
+                      <li class="list-group-item px-2 py-1.5 d-flex align-items-center justify-content-between gap-4">
+                        <span class="text-muted fw-medium">Holders</span>
+                        <span class="fw-medium">${formatWhole(custom.holders)}</span>
+                      </li>
+                      <li class="list-group-item px-2 py-1.5 d-flex align-items-center justify-content-between gap-4">
+                        <span class="text-muted fw-medium">% Market Cap</span>
+                        <span class="fw-medium">${formatPercentFloor(custom.marketCapShare, 2, 0.1)}</span>
+                      </li>
+                    </ul>
+                  </div>`;
+                }
+            },
+            series: [
+                {
+                    name: '% of Total Holders',
+                    data: seriesData
+                }
+            ],
+            credits: {
+                enabled: false
+            },
+            exporting: {
+                enabled: false
+            }
+        });
+    };
+
+    // holdersThresholdDepthChart
+    //
+    const holdersThresholdDepthData = '[{ "name": "> $10", "y": 5.90880392055161, "color": "#1ABC9C", "custom": { "rawCount": 810595, "ratio": 8.2230970630702, "scaledCount": 5.90880392055161 } },{ "name": "> $50", "y": 5.51753633583928, "color": "#1ABC9C", "custom": { "rawCount": 329258, "ratio": 3.34016431484572, "scaledCount": 5.51753633583928 } },{ "name": "> $100", "y": 5.3487895222282, "color": "#1ABC9C", "custom": { "rawCount": 223249, "ratio": 2.26475391068704, "scaledCount": 5.3487895222282 } },{ "name": "> $250", "y": 5.11774180265168, "color": "#1ABC9C", "custom": { "rawCount": 131142, "ratio": 1.33037262140175, "scaledCount": 5.11774180265168 } },{ "name": "> $500", "y": 4.94437408495573, "color": "#1ABC9C", "custom": { "rawCount": 87978, "ratio": 0.892494566848784, "scaledCount": 4.94437408495573 } },{ "name": "> $1k", "y": 4.75912369171059, "color": "#1ABC9C", "custom": { "rawCount": 57428, "ratio": 0.582579485609948, "scaledCount": 4.75912369171059 } },{ "name": "> $10k", "y": 4.08156332098039, "color": "#1ABC9C", "custom": { "rawCount": 12066, "ratio": 0.122403776439535, "scaledCount": 4.08156332098039 } },{ "name": "> $100k", "y": 3.23095955574857, "color": "#1ABC9C", "custom": { "rawCount": 1702, "ratio": 0.0172659727747463, "scaledCount": 3.23095955574857 } },{ "name": "> $1M", "y": 2.32633586092875, "color": "#1ABC9C", "custom": { "rawCount": 212, "ratio": 0.00215063820696018, "scaledCount": 2.32633586092875 } }]';
+    let holdersThresholdDepthChart = null;
+    function renderThresholdDepthChart(viewModel) {
+        const chartContainer = document.getElementById(defaultConfig.selectors.threshold.chartContainerId);
+        const fallback = document.getElementById(defaultConfig.selectors.threshold.chartFallbackId);
+        if (!chartContainer) return;
+
+        const showFallback = function (message) {
+            chartContainer.style.display = 'none';
+            if (!fallback) return;
+            const fallbackText = fallback.querySelector('span');
+            if (fallbackText) fallbackText.textContent = message;
+            fallback.classList.remove('d-none');
+        };
+
+        if (typeof window.Highcharts === 'undefined') {
+            showFallback('Chart unavailable: failed to load chart library.');
+            return;
+        }
+
+        const chartData = JSON.parse(holdersThresholdDepthData);
+        if (!chartData.length) {
+            showFallback('Chart unavailable: no wallet depth data.');
+            return;
+        }
+
+        const categories = chartData.map(function (point) { return point.name; });
+        const seriesData = chartData.map(function (point) {
+            return {
+                name: point.name,
+                y: point.y,
+                color: point.color,
+                custom: point.custom
+            };
+        });
+
+        const maxValue = seriesData.reduce(function (max, point) {
+            return Math.max(max, point.y);
+        }, 0);
+        const thresholdTopTick = Math.log10(defaultConfig.charts.threshold.axisTopTickValue);
+        const thresholdScaleMax = Math.max(thresholdTopTick, Math.ceil(maxValue));
+        const thresholdAxisMax = thresholdScaleMax + defaultConfig.charts.threshold.axisTopPadding;
+        const thresholdTickPositions = buildThresholdScaleTickPositions(Math.floor(thresholdScaleMax));
+        if (thresholdTickPositions[thresholdTickPositions.length - 1] < thresholdScaleMax) {
+            thresholdTickPositions.push(thresholdScaleMax);
+        }
+
+        chartContainer.style.display = '';
+        if (fallback) fallback.classList.add('d-none');
+
+        if (holdersThresholdDepthChart) {
+            holdersThresholdDepthChart.xAxis[0].setCategories(categories, false);
+            holdersThresholdDepthChart.series[0].setData(seriesData, false, false, false);
+            holdersThresholdDepthChart.yAxis[0].update({
+                max: thresholdAxisMax,
+                tickPositions: thresholdTickPositions
+            }, false);
+            holdersThresholdDepthChart.redraw(false);
+            holdersThresholdDepthChart.reflow();
+            return;
+        }
+
+        holdersThresholdDepthChart = window.Highcharts.chart(defaultConfig.selectors.threshold.chartContainerId, {
+            chart: {
+                type: 'bar',
+                backgroundColor: 'transparent',
+                animation: false,
+                spacing: defaultConfig.charts.threshold.spacing
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: categories,
+                title: {
+                    text: null
+                },
+                gridLineWidth: 0,
+                gridLineColor: 'transparent',
+                minorGridLineWidth: 0,
+                lineWidth: 0,
+                tickWidth: 0,
+                labels: {
+                    y: 4,
+                    style: {
+                        color: 'var(--bs-secondary-color)',
+                        fontSize: '10px',
+                        fontWeight: '500'
+                    }
+                }
+            },
+            yAxis: {
+                min: 0,
+                max: thresholdAxisMax,
+                tickPositions: thresholdTickPositions,
+                title: {
+                    text: null
+                },
+                gridLineWidth: 1,
+                gridLineDashStyle: 'dash',
+                gridLineColor: 'var(--bs-border-color)',
+                lineColor: 'var(--bs-border-color)',
+                tickColor: 'var(--bs-border-color)',
+                labels: {
+                    reserveSpace: true,
+                    overflow: 'allow',
+                    autoRotation: false,
+                    rotation: 0,
+                    style: {
+                        color: 'var(--bs-secondary-color)',
+                        fontSize: '9px'
+                    },
+                    formatter: function () {
+                        return formatThresholdScaleTickLabel(this.value);
+                    }
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    animation: false,
+                    clip: false
+                },
+                bar: {
+                    borderWidth: 0,
+                    borderRadius: 3,
+                    pointPadding: 0.1,
+                    groupPadding: 0.05,
+                    pointWidth: defaultConfig.charts.threshold.pointWidth,
+                    dataLabels: {
+                        enabled: true,
+                        crop: true,
+                        overflow: 'justify',
+                        allowOverlap: false,
+                        verticalAlign: 'middle',
+                        align: 'left',
+                        x: 4,
+                        y: -1.5,
+                        formatter: function () {
+                            return formatCompactNumber(this.point.options.custom.rawCount);
+                        },
+                        style: {
+                            fontWeight: 'normal',
+                            fontSize: '9px',
+                            textOutline: 'none',
+                            color: 'var(--bs-body-color)'
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                useHTML: true,
+                formatter: function () {
+                    const custom = this.point.options.custom;
+                    const safePointName = escapeHtml(this.point.name);
+                    return `
+                  <div class="card shadow" style="border-radius: 0.5rem;">
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item px-2 py-1.5">
+                        <div class="fw-medium" style="font-weight: 500 !important;">${safePointName}</div>
+                      </li>
+                      <li class="list-group-item px-2 py-1.5 d-flex align-items-center justify-content-between gap-4">
+                        <span class="text-muted fw-medium">Holders</span>
+                        <span class="fw-medium">${formatWhole(custom.rawCount)}</span>
+                      </li>
+                      <li class="list-group-item px-2 py-1.5 d-flex align-items-center justify-content-between gap-4">
+                        <span class="text-muted fw-medium">% of Total</span>
+                        <span class="fw-medium">${formatPercentFloor(custom.ratio, 2, 0.1)}</span>
+                      </li>
+                    </ul>
+                  </div>`;
+                }
+            },
+            series: [
+                {
+                    name: 'Wallet Depth',
+                    data: seriesData
+                }
+            ],
+            credits: {
+                enabled: false
+            },
+            exporting: {
+                enabled: false
+            }
+        });
+    };
+
+
+    // helpers
+    function buildThresholdScaleTickPositions(maxExponent) {
+        const safeMax = Math.max(0, Math.ceil(toNumber(maxExponent)));
+        return Array.from({ length: safeMax + 1 }, function (_, idx) { return idx; });
+    };
+    function formatThresholdScaleTickLabel(value) {
+        const numeric = Math.pow(10, toNumber(value));
+        if (numeric >= 1000000) return `${Math.round(numeric / 1000000)}M`;
+        if (numeric >= 1000) return `${Math.round(numeric / 1000)}K`;
+        return formatWhole(numeric);
+    };
+
+    function toNumber(value) {
+        const parsed = parseNumericValue(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    function parseNumericValue(value) {
+        if (value === null || value === undefined) return Number.NaN;
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+            const normalized = value
+                .trim()
+                .replace(/,/g, '')
+                .replace(/\$/g, '')
+                .replace(/%$/g, '');
+            return Number(normalized);
+        }
+        return Number(value);
+    };
+
+    function formatCompactNumber(value) {
+        return new Intl.NumberFormat('en-US', {
+            notation: 'compact',
+            maximumFractionDigits: 2
+        }).format(value);
+    };
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
+    function formatWhole(value) {
+        return new Intl.NumberFormat('en-US').format(Math.round(value));
+    };
+
+    function formatPercent(value, decimals) {
+        return `${toNumber(value).toFixed(decimals)}%`;
+    };
+
+    function formatPercentFloor(value, decimals, floorValue) {
+        const numericValue = toNumber(value);
+        if (numericValue > 0 && numericValue < floorValue) {
+            return `<${floorValue.toFixed(1)}%`;
+        }
+        return `${numericValue.toFixed(decimals)}%`;
+    };
+</script>
+</html>

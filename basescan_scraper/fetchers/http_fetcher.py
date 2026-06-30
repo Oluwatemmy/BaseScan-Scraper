@@ -13,6 +13,7 @@ from basescan_scraper.fetchers.base import (
 
 _BACKOFF_BASE_SECONDS = 0.5
 _BACKOFF_CAP_SECONDS = 8.0
+_DEFAULT_ENCODING = "utf-8"
 
 _HEADERS = {
     "User-Agent": (
@@ -35,11 +36,15 @@ class HttpFetcher:
 
     def __init__(self, settings: Settings):
         self._settings = settings
+        # follow_redirects=False: we only ever fetch our own fixed-host paths, so
+        # a 3xx from a compromised/MITM'd upstream must NOT be chased to an
+        # attacker-chosen (possibly internal) host. A redirect is treated as an
+        # upstream failure instead (see _request).
         self._client = httpx.AsyncClient(
             base_url=settings.base_url,
             headers=_HEADERS,
             timeout=settings.request_timeout_seconds,
-            follow_redirects=True,
+            follow_redirects=False,
         )
         self._throttle = asyncio.Lock()
         self._last_request_at = 0.0
@@ -63,6 +68,23 @@ class HttpFetcher:
         delay = min(_BACKOFF_CAP_SECONDS, _BACKOFF_BASE_SECONDS * (2 ** attempt))
         await asyncio.sleep(delay)
 
+    async def _read_capped(self, resp: httpx.Response, path: str) -> str:
+        """Stream the body, aborting as soon as it exceeds the size cap so a
+        hostile/oversized upstream can't force a full-body allocation. Rejects
+        early on a too-large declared Content-Length before reading any bytes."""
+        cap = self._settings.max_response_bytes
+        declared = resp.headers.get("content-length")
+        if declared and declared.isdigit() and int(declared) > cap:
+            raise ResponseTooLarge(f"{declared} bytes (declared) for {path}")
+        total = 0
+        chunks: list[bytes] = []
+        async for chunk in resp.aiter_bytes():
+            total += len(chunk)
+            if total > cap:
+                raise ResponseTooLarge(f"{total}+ bytes for {path}")
+            chunks.append(chunk)
+        return b"".join(chunks).decode(resp.encoding or _DEFAULT_ENCODING, errors="replace")
+
     async def _request(
         self, method: str, path: str, json_body: dict | None = None
     ) -> str:
@@ -71,35 +93,38 @@ class HttpFetcher:
         total_attempts = retries + 1
         for attempt in range(total_attempts):
             await self._wait_turn()
+            retry = False
             try:
                 if method == "POST":
-                    resp = await self._client.post(
-                        path, json=json_body, headers=_JSON_HEADERS
+                    stream = self._client.stream(
+                        "POST", path, json=json_body, headers=_JSON_HEADERS
                     )
                 else:
-                    resp = await self._client.get(path)
+                    stream = self._client.stream("GET", path)
+                async with stream as resp:
+                    if resp.status_code == 429:
+                        raise UpstreamRateLimited(f"429 for {path}")
+                    if resp.status_code >= 500:
+                        last_exc = UpstreamUnavailable(f"{resp.status_code} for {path}")
+                        retry = True
+                    elif 300 <= resp.status_code < 400:
+                        # Redirect not followed — see __init__ comment.
+                        raise UpstreamUnavailable(
+                            f"{resp.status_code} redirect blocked for {path}"
+                        )
+                    elif resp.status_code >= 400:
+                        raise UpstreamUnavailable(f"{resp.status_code} for {path}")
+                    else:
+                        return await self._read_capped(resp, path)
             except httpx.TimeoutException as exc:
                 last_exc = exc
-                await self._backoff(attempt, total_attempts)
-                continue
+                retry = True
             except httpx.HTTPError as exc:
                 last_exc = exc
+                retry = True
+            if retry:
                 await self._backoff(attempt, total_attempts)
                 continue
-
-            if resp.status_code == 429:
-                raise UpstreamRateLimited(f"429 for {path}")
-            if resp.status_code >= 500:
-                last_exc = UpstreamUnavailable(f"{resp.status_code} for {path}")
-                await self._backoff(attempt, total_attempts)
-                continue
-            if resp.status_code >= 400:
-                raise UpstreamUnavailable(f"{resp.status_code} for {path}")
-
-            body = resp.content
-            if len(body) > self._settings.max_response_bytes:
-                raise ResponseTooLarge(f"{len(body)} bytes for {path}")
-            return resp.text
 
         if isinstance(last_exc, httpx.TimeoutException):
             raise UpstreamTimeout(str(last_exc)) from last_exc
