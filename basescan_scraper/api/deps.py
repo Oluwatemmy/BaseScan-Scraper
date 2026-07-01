@@ -5,6 +5,7 @@ from basescan_scraper.cache.memory import MemoryCache
 from basescan_scraper.config import get_settings
 from basescan_scraper.fetchers.http_fetcher import HttpFetcher
 from basescan_scraper.services.address_service import AddressService
+from basescan_scraper.services.contract_service import ContractService
 from basescan_scraper.services.token_service import TokenService
 from basescan_scraper.services.transaction_service import TransactionService
 
@@ -30,3 +31,7 @@ def get_transaction_service() -> TransactionService:
 
 def get_token_service() -> TokenService:
     return TokenService(_fetcher(), _cache())
+
+
+def get_contract_service() -> ContractService:
+    return ContractService(_fetcher(), _cache())

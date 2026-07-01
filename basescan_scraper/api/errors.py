@@ -56,4 +56,4 @@ def register_error_handlers(app) -> None:
     @app.exception_handler(NotFound)
     async def _on_not_found(_: Request, exc: NotFound):
         return _problem(404, "/errors/not-found", "Not found",
-                        "No transaction found for that hash on Base.")
+                        "The requested resource was not found on Base.")

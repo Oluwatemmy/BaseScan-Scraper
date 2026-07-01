@@ -102,3 +102,29 @@ async def test_live_token_info_and_holders():
     top = holders.data[0]
     assert top.percentage and top.percentage.endswith("%")
     assert top.percentage != "0.0000%"
+
+
+@pytest.mark.live
+async def test_live_contract_verified_and_proxy():
+    from basescan_scraper.cache.memory import MemoryCache
+    from basescan_scraper.fetchers.http_fetcher import HttpFetcher
+    from basescan_scraper.services.contract_service import ContractService
+
+    weth = "0x4200000000000000000000000000000000000006"
+    usdc = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+    fetcher = HttpFetcher(get_settings())
+    svc = ContractService(fetcher, MemoryCache(maxsize=10, ttl=0))
+    try:
+        w = await svc.get_contract(weth)
+        u = await svc.get_contract(usdc)
+    finally:
+        await fetcher.aclose()
+    # WETH: verified single-file, not a proxy
+    assert w.is_verified is True and w.contract_name == "WETH9"
+    assert len(w.source_files) >= 1 and "pragma solidity" in w.source_files[0].content
+    assert isinstance(w.abi, list) and len(w.abi) > 0
+    assert w.is_proxy is False
+    # USDC: verified multi-file proxy
+    assert u.is_verified is True and u.is_proxy is True
+    assert u.implementation_address and u.implementation_address.startswith("0x")
+    assert len(u.source_files) > 1
